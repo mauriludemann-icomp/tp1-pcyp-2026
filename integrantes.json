@@ -1,0 +1,12 @@
+{
+  "grupo": "REEMPLAZAR_CON_NOMBRE_DEL_GRUPO",
+  "repositorio": "REEMPLAZAR_CON_URL_DEL_REPOSITORIO",
+  "integrantes": [
+    {
+      "nombre": "REEMPLAZAR",
+      "documento": "REEMPLAZAR",
+      "usuarioGit": "REEMPLAZAR"
+    }
+  ]
+}
+
