@@ -3,9 +3,21 @@
   "repositorio": "REEMPLAZAR_CON_URL_DEL_REPOSITORIO",
   "integrantes": [
     {
-      "nombre": "REEMPLAZAR",
-      "documento": "REEMPLAZAR",
-      "usuarioGit": "REEMPLAZAR"
+      "nombre": "Álvaro Bastía",
+      "documento": "44783012",
+      "usuarioGit": "Alvax10"
+    }
+    
+    {
+      "nombre": "Carlos Britez",
+      "documento": "44221771",
+      "usuarioGit": "carlosbritez-8"
+    }
+    
+    {
+      "nombre": "Sol Género",
+      "documento": "46541859",
+      "usuarioGit": "solcha-g"
     }
     {
       "nombre": "Emilio Tarrago",
@@ -13,9 +25,9 @@
       "usuarioGit": "E1000io-bit"
     }
     {
-      "nombre": "REEMPLAZAR",
-      "documento": "REEMPLAZAR",
-      "usuarioGit": "REEMPLAZAR"
+      "nombre": "Hebe Azul Usandivaras",
+      "documento": "44768075",
+      "usuarioGit": "HebeAUsandivaras"
     }
   ]
 }
