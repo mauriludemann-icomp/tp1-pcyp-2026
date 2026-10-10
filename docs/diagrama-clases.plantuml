@@ -1,0 +1,92 @@
+@startuml diagrama-clases
+
+class PrinterManager {
+    - printers: Printer[][] 
+    + synchronized acquireAvailablePrinter(): Printer
+    + synchronized releasePrinter(String printerId): void 
+    + markOutOfService(String printerId): void 
+}
+
+class Printer {
+    - id: String
+    - pos: int[2] 
+    - state: PrinterState
+    - assignedOrderId: int
+    - count: int
+    + changeState():. void
+    + incCount(): void
+    + transitionTo(PrinterState newState):void
+    + getId(): String
+    + getPos(): int[2]
+    + getState(): PrinterState
+    + getAssignedOrderId(): int
+    + getCount(): int
+    + setId(String id): void
+    + setPos(int[2] pos): void
+    + setState(PrinterState state): void
+    + setAssignedOrderId(int assignedOrderId): void        
+    + setCount(int count): void
+}
+
+enum PrinterState {
+    AVAILABLE
+    RESERVED
+    OUT_OF_SERVICE
+}
+
+class PrinterFactory {
+    + createPrinterManager(int rows, int cols): PrinterManager
+}
+
+class PrinterAssignmentWorker {
+    - printerManager: PrinterManager
+}
+
+abstract class Worker {
+    # inputQueue: WorkQueue
+    # outputQueue: WorkQueue
+    # eventLogger: EventLogger
+    # stageName: String 
+    +run(): void
+    # processOrder(Order order): void
+}
+
+class Order {
+    -state: OrderState
+    -order_id: int
+    -idPrinterAssigned: String
+    +transitionTo(OrderState newState, String printerId): void
+    + getPrinterAssigned(): String
+
+}
+enum OrderState {
+    APPROVED
+    REJECTED
+    READY_TO_PRINT
+    WAINTING_VALIDATION
+    PRINT_FAILED
+    DEFECTIVE
+    PRINTED
+    CREATED
+}
+
+class WorkQueue {
+    - queue: Queue<Order>
+    - int capacity
+    - boolean closed
+    + push(Order order): void
+    + pop(): Order
+    + close(): void
+    + isEmpty(): boolean
+    + size(): int
+}
+
+class OrderFactory {
+    + createOrders(int totalOrder): List<Order>
+    - createOrder(int id): Order
+}
+
+class OrderManager {
+    - orderMap[]:Map
+    + getOrderById
+}
