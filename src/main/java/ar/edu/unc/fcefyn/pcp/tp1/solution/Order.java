@@ -56,15 +56,25 @@ public class Order {
      * Etapa 1: Asigna impresora y cambia estado a WAITING_VALIDATION.
      */
     public synchronized void onAssigned(String printerId) {
+        if (state != OrderState.CREATED) {
+            throw new IllegalStateException("La orden " + id + " no está en estado CREATED");
+        }
+        if (printerId == null || printerId.isBlank()) {
+            throw new IllegalArgumentException("El identificador de la impresora no puede ser nulo ni vacío");
+        }
         this.assignedPrinterId = printerId;
         this.state = OrderState.WAITING_VALIDATION;
         this.assignmentCount++;
     }
 
+
     /**
      * Etapa 2: Aplica el resultado de la validación del modelo.
      */
     public synchronized void onValidationResult(boolean isValid) {
+        if (state != OrderState.WAITING_VALIDATION) {
+            throw new IllegalStateException("La orden " + id + " no está en estado WAITING_VALIDATION");
+        }
         this.validationCount++;
         if (isValid) {
             this.state = OrderState.READY_TO_PRINT;
@@ -77,6 +87,9 @@ public class Order {
      * Etapa 3: Aplica el resultado del proceso de impresión.
      */
     public synchronized void onPrintResult(boolean isSuccess) {
+        if (state != OrderState.READY_TO_PRINT) {
+            throw new IllegalStateException("La orden " + id + " no está en estado READY_TO_PRINT");
+        }
         this.printingCount++;
         if (isSuccess) {
             this.state = OrderState.PRINTED;
@@ -89,6 +102,9 @@ public class Order {
      * Etapa 4: Aplica el resultado del control de calidad.
      */
     public synchronized void onQualityResult(boolean isApproved) {
+        if (state != OrderState.PRINTED) {
+            throw new IllegalStateException("La orden " + id + " no está en estado PRINTED");
+        }
         this.qualityControlCount++;
         if (isApproved) {
             this.state = OrderState.APPROVED;
