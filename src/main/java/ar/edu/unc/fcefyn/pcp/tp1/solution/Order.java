@@ -1,89 +1,144 @@
 package ar.edu.unc.fcefyn.pcp.tp1.solution;
 
+import ar.edu.unc.fcefyn.pcp.tp1.api.OrderSnapshot;
 import ar.edu.unc.fcefyn.pcp.tp1.api.OrderState;
 
-/**
- * Representacion interna y mutable de una orden de fabricacion.
- *
- * <p>Una orden es tomada por exactamente un hilo a la vez: circula de una
- * etapa a la siguiente exclusivamente a traves de instancias de
- * {@link WorkQueue}. La entrega de la orden dentro de {@code WorkQueue}
- * (bloque {@code synchronized} en {@code put}/{@code take}) establece una
- * relacion happens-before segun el modelo de memoria de Java entre quien
- * escribe los campos de la orden y quien los lee a continuacion, por lo que
- * esta clase no necesita sincronizacion propia: nunca hay dos hilos
- * accediendo a la misma orden de forma concurrente sin pasar antes por el
- * monitor de una cola.</p>
- */
-final class Order {
+public final class Order {
 
     private final int id;
     private OrderState state = OrderState.CREATED;
     private Printer printer;
+    private int assignmentCount;
+    private int validationCount;
+    private int printingCount;
+    private int qualityControlCount;
 
-    private int assignmentCount = 0;
-    private int validationCount = 0;
-    private int printingCount = 0;
-    private int qualityControlCount = 0;
-
-    Order(int id) {
+    /**
+     * Constructor. Asignamos una id a la orden.
+     * Tiramos una "IllegalArgumentException" en caso de que el id no sea valido.
+     *
+     *      -Arranca en estado "CREATED"
+     * */
+    public Order(int id) {
+        if (id <= 0) {
+            throw new IllegalArgumentException("El id de la orden debe ser mayor que cero");
+        }
         this.id = id;
     }
 
-    int getId() {
+    public int id() {
         return id;
     }
 
-    OrderState getState() {
+    public OrderState state() {
         return state;
     }
 
-    void setState(OrderState state) {
-        this.state = state;
-    }
-
-    Printer getPrinter() {
+    //Retorna la impresora asociada a la orden
+    public Printer printer() {
         return printer;
     }
 
-    void setPrinter(Printer printer) {
-        this.printer = printer;
+    //Identificamos la impresora asignada. En caso de no haber, retornamos null
+    public String printerId() {
+        if(printer == null){
+            return null;
+        } else {
+            return printer.id();
+        }
     }
 
-    /** Identificador historico de la impresora usada por la orden (o null). */
-    String getPrinterId() {
-        return printer == null ? null : printer.getId();
+    /**
+     * Cambiamos el estado de la orden. Debemos chequear que sea una transicion valida.
+     * Guardamos:
+     *      - Orden anterior
+     *      - Orden nueva (actual)
+     *
+     *      -En caso de que la transicion sea invalida, lanzamos "IllegalStateException"
+     */
+    public OrderState moveTo(OrderState next) {
+        if (!isValidTransition(state, next)) {
+            throw new IllegalStateException(
+                    "Orden " + id + ": transición inválida " + state + " -> " + next);
+        }
+        OrderState previous = state;
+        state = next;
+        return previous;
     }
 
-    int getAssignmentCount() {
-        return assignmentCount;
-    }
+    /**
+     * Asignamos una impresora a la orden
+     *
+     * Condiciones:
+     *      - La orden no tuvo que haber sido creada
+     *      - La orden no debe tener impresora asociada
+     *
+     * En caso de que la impresora sea null, lanzamos "IllegalArgumentException"
+     * En caso de que la orden ya fue creada o ya tenga impresora asignada: "IllegalStateException"
+     */
+    public void assignPrinter(Printer assigned) {
+        if (assigned == null) {
+            throw new IllegalArgumentException("La impresora no puede ser null");
+        }
 
-    void incrementAssignmentCount() {
+        if (state != OrderState.CREATED || printer != null) {
+            throw new IllegalStateException("Orden " + id + ": ya fue asignada o no está en CREATED");
+        }
+
+        printer = assigned;
         assignmentCount++;
     }
 
-    int getValidationCount() {
-        return validationCount;
-    }
-
-    void incrementValidationCount() {
+    //Aumentamos contador de validaciones. Requiere que la orden se encuentre en estado VALIDATION.
+    public void recordValidation() {
+        requireState(OrderState.WAITING_VALIDATION);
         validationCount++;
     }
 
-    int getPrintingCount() {
-        return printingCount;
-    }
-
-    void incrementPrintingCount() {
+    //Aumentamos contador de impresiones. Requiere que la orden se encuentre en estado READY TO PRINT.
+    public void recordPrinting() {
+        requireState(OrderState.READY_TO_PRINT);
         printingCount++;
     }
 
-    int getQualityControlCount() {
-        return qualityControlCount;
+    //Aumentamos contador de controles de calidad. Requiere que la orden se encuentre en estado PRINTED.
+    public void recordQualityControl() {
+        requireState(OrderState.PRINTED);
+        qualityControlCount++;
     }
 
-    void incrementQualityControlCount() {
-        qualityControlCount++;
+    //Retornamos el estado actual de la orden en un tiepo dado
+    public OrderSnapshot snapshot() {
+        return new OrderSnapshot(
+                id, state, printerId(),
+                assignmentCount, validationCount, printingCount, qualityControlCount);
+    }
+
+    //Valida que el estado esperado de la orden sea el correcto. En caso contratrio lanza "IllegalStateException"
+    private void requireState(OrderState expected) {
+        if (state != expected) {
+            throw new IllegalStateException(
+                    "Orden " + id + ": se esperaba " + expected + " pero está en " + state);
+        }
+    }
+
+    //Definimos las transiciones validas. Cualquier transicion que no se encuentre aca, no es valida.
+    private static boolean isValidTransition(OrderState from, OrderState to) {
+        return switch (from) {
+            //Si nos encontramos en estado CREATED, debemos pasar a estado WAITING_VALIDATION
+            case CREATED -> to == OrderState.WAITING_VALIDATION;
+            /*
+            * Si nos encontramos en estado WAITING_VALIDATION, podemos:
+            *   1) READY_TO_PRINT si el modelo es valido
+            *   2) REJECTED si el modelo es invalido
+            */
+            case WAITING_VALIDATION -> to == OrderState.READY_TO_PRINT
+                    || to == OrderState.REJECTED;
+            case READY_TO_PRINT -> to == OrderState.PRINTED
+                    || to == OrderState.PRINT_FAILED;
+            case PRINTED -> to == OrderState.APPROVED
+                    || to == OrderState.DEFECTIVE;
+            case APPROVED, REJECTED, PRINT_FAILED, DEFECTIVE -> false;
+        };
     }
 }
