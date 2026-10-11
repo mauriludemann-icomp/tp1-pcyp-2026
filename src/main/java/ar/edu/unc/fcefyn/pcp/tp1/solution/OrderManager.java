@@ -24,6 +24,9 @@ public class OrderManager {
         if (order == null) {
             throw new IllegalArgumentException("La orden no puede ser nula");
         }
+        if (orderMap.containsKey(order.getId())){
+            throw new IllegalArgumentException("La orden existe");
+        }
         orderMap.put(order.getId(), order);
     }
 

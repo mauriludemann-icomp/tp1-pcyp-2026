@@ -24,17 +24,13 @@ public class WorkQueue {
      * a los hilos en espera.
      * @param order: La orden a agregar en la cola
      */
-    public synchronized void push(Order order) {
+    public synchronized void push(Order order) throws InterruptedException {
         // Bloquea mientras la cola esté llena y no cerrada
         while (queue.size() == capacity && !closed) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            wait();
         }
         if (closed) {
-            return;
+            throw new IllegalStateException("La cola esta cerrada. No se puede agregar una orden.");
         }
 
         queue.add(order);
@@ -47,17 +43,13 @@ public class WorkQueue {
      * cierre.
      * @return El elemento extraído o null si la cola fue cerrada y no quedan elementos.
      */
-    public synchronized Order pop(){
+    public synchronized Order pop() throws InterruptedException {
         while (queue.isEmpty() && !closed) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            wait();
         }
 
-        // Si despertó, está vacía y se cerró la cola, no hay más trabajo
-        if (queue.isEmpty() && closed) {
+        // Si despertó, pero la cola sigue vacía, entonces la cola está cerrada. Retorna null para Graceful Shutdown
+        if (queue.isEmpty()) {
             return null;
         }
 
