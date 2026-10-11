@@ -2,6 +2,7 @@
 
 class PrinterManager {
     - printers: Printer[][] 
+    ' aquireAvailablePrinter debe devolver una impresora disponible y cambiar el estado de la impresora a RESERVED.
     + synchronized acquireAvailablePrinter(): Printer
     + synchronized releasePrinter(String printerId): void 
     + markOutOfService(String printerId): void 
@@ -13,7 +14,7 @@ class Printer {
     - state: PrinterState
     - assignedOrderId: int
     - count: int
-    + changeState():. void
+    + changeState(): void
     + incCount(): void
     + transitionTo(PrinterState newState):void
     + getId(): String
@@ -38,9 +39,7 @@ class PrinterFactory {
     + createPrinterManager(int rows, int cols): PrinterManager
 }
 
-class PrinterAssignmentWorker {
-    - printerManager: PrinterManager
-}
+
 
 abstract class Worker {
     # inputQueue: WorkQueue
@@ -49,6 +48,40 @@ abstract class Worker {
     # stageName: String 
     +run(): void
     # processOrder(Order order): void
+}
+
+class PrinterAssignmentWorker {
+    - printerManager: PrinterManager
+}
+
+class ValidationWorker {
+    - printerManager: PrinterManager
+}
+
+class QualityWorker {
+    - printerManager: PrinterManager
+}
+
+class OutcomeDeciderWorker {
+    + VALIDATION_SALT: long
+    + PRINTING_SALT:long
+    + QUALITY_SALT: long
+    + isModelValid(): boolean$
+    + isPrintSuccesfull(): boolean$
+    + isQualityApproved(): boolean$
+}
+
+' Hay que crear 4 instancias def WOrkQueue, una para cada etapa
+class WorkQueue {
+    - queue: Queue<Order>
+    - int capacity
+    - boolean closed
+    ' Al hacer push sobre una queue se debe hacer un notifyAll de los hilos de la siguiente etapa para que busquen el recurso
+    + push(Order order): void
+    + pop(): Order
+    + close(): void
+    + isEmpty(): boolean
+    + size(): int
 }
 
 class Order {
@@ -70,23 +103,26 @@ enum OrderState {
     CREATED
 }
 
-class WorkQueue {
-    - queue: Queue<Order>
-    - int capacity
-    - boolean closed
-    + push(Order order): void
-    + pop(): Order
-    + close(): void
-    + isEmpty(): boolean
-    + size(): int
-}
 
+
+' CreateOrders devuelve una lista de ordenes creadas. Desde ConcurrentSimuilation se debe agregar las ordenes a la WorkQueue correspondiente. Al ser factoyry solo se encarga de crearlas nada mas.
 class OrderFactory {
     + createOrders(int totalOrder): List<Order>
     - createOrder(int id): Order
 }
 
-class OrderManager {
+class OrderManager {    
     - orderMap[]:Map
     + getOrderById
+}
+/' El hilo main recorre la lista de órdenes y hace dos cosas por cada una:
+
+Deposita la orden en la primera cola: createdQueue.push(order).
+
+Escribe la fila inicial en eventos.csv con stage = INITIALIZATION y event = ORDER_CREATED. '/
+
+class EventLogger {
+    + field : type
+    + field : type
+    + field : type
 }
