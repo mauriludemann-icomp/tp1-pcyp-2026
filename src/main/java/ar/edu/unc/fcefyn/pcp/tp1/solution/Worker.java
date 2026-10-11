@@ -19,22 +19,22 @@ public abstract class Worker implements Runnable {
      */
     @Override
     public void run() {
-        while (true) {
-            // Extrae la siguiente orden. Si la cola cerró y se vació, devuelve null.
-            Order order = inputQueue.pop();
+        try {
+            while (true) {
+                // Extrae la siguiente orden. Si la cola cerró y se vació, devuelve null.
+                Order order = inputQueue.pop();
 
-            if (order == null) {
-                // Graceful Shutdown: finaliza la ejecución del hilo de esta etapa
-                break;
+                if (order == null) {
+                    // Graceful Shutdown: finaliza la ejecución del hilo de esta etapa
+                    break;
+                }
+
+                // Delegación polimórfica a la etapa concreta
+                processOrder(order);
             }
-
-            // Delegación polimórfica a la etapa concreta
-            processOrder(order);
-        }
-
-        // Si esta etapa tiene una cola de salida, la cierra para propagar la señal al siguiente worker
-        if (outputQueue != null) {
-            outputQueue.close();
+        } catch (InterruptedException e) {
+            // Finaliza esta etapa y conserva la señal para quien coordina los workers.
+            Thread.currentThread().interrupt();
         }
     }
 
