@@ -1,0 +1,252 @@
+@startuml diagrama-secuencia
+title Diagrama de Secuencia - Simulación Concurrente y Pipeline Multihilo (TP1)
+
+autonumber
+skinparam BoxPadding 10
+skinparam ParticipantPadding 10
+skinparam Shadowing false
+skinparam roundcorner 8
+skinparam ResponseMessageBelowArrow true
+
+box "Simulación y Coordinación" #EBF3FB
+    participant "sim : ConcurrentSimulation" as Sim
+    participant "coord : PipelineCoordinator" as Coord
+end box
+
+box "Etapa 1: Asignación (3 hilos)" #EAF2E8
+    queue "queueAssign : WorkQueue" as QA
+    participant "hilosAssign [1..3] :\nThread(PrinterAssignmentWorker)" as WA
+end box
+
+box "Etapa 2: Validación (2 hilos)" #FFF2CC
+    queue "queueValid : WorkQueue" as QV
+    participant "hilosValid [1..2] :\nThread(ValidationWorker)" as WV
+end box
+
+box "Etapa 3: Impresión (3 hilos)" #FCE5CD
+    queue "queuePrint : WorkQueue" as QP
+    participant "hilosPrint [1..3] :\nThread(PrintingWorker)" as WP
+end box
+
+box "Etapa 4: Control Calidad (2 hilos)" #E1D5E7
+    queue "queueQual : WorkQueue" as QQ
+    participant "hilosQual [1..2] :\nThread(QualityWorker)" as WQ
+end box
+
+box "Dominio y Recursos Compartidos" #F5F5F5
+    participant "orderManager : OrderManager" as OM
+    participant "printerManager : PrinterManager" as PM
+    participant "order : Order" as Ord
+    participant "eventLogger : EventLogger" as Log
+    participant "OutcomeDecider" as Decider
+end box
+
+== 1. Inicialización de la Simulación y Creación de Hilos ==
+
+Sim -> OM ** : new()
+Sim -> PM ** : new(rows, cols)
+Sim -> Log ** : new(outputDirectory)
+Sim -> QA ** : new()
+Sim -> QV ** : new()
+Sim -> QP ** : new()
+Sim -> QQ ** : new()
+
+group Creación y encolado inicial de Órdenes
+    loop Para cada orden i = 1 .. totalOrders
+        Sim -> Ord ** : new(i)
+        Sim -> OM : addOrder(order)
+        Sim -> Log : logEvent(i, INITIALIZATION, ORDER_CREATED, null, CREATED, "")
+        Sim -> QA : push(order)
+    end
+    Sim -> QA : close()
+    note over QA: queueAssign se cierra: no habrá más órdenes ingresadas por main
+end
+
+group Creación de Workers e Hilos según Configuración (Total: 10 hilos)
+    loop i = 1 .. config.assignmentThreads() [3 hilos]
+        Sim -> WA ** : new Thread(new PrinterAssignmentWorker(QA, QV, Log, config, PM), "assignment-" + i)
+    end
+    loop i = 1 .. config.validationThreads() [2 hilos]
+        Sim -> WV ** : new Thread(new ValidationWorker(QV, QP, Log, config, PM), "validation-" + i)
+    end
+    loop i = 1 .. config.printingThreads() [3 hilos]
+        Sim -> WP ** : new Thread(new PrintingWorker(QP, QQ, Log, config, PM), "printing-" + i)
+    end
+    loop i = 1 .. config.qualityControlThreads() [2 hilos]
+        Sim -> WQ ** : new Thread(new QualityWorker(QQ, Log, config), "quality-" + i)
+    end
+end
+
+Sim -> Coord ** : new(stages, queues)
+Sim -> Coord : startAllWorkers()
+activate Coord
+note over Coord: Inicia todos los hilos concurrentemente (todas las etapas corren en paralelo)
+loop para cada uno de los 10 hilos en stages
+    Coord -> WA : start() (3 hilos)
+    Coord -> WV : start() (2 hilos)
+    Coord -> WP : start() (3 hilos)
+    Coord -> WQ : start() (2 hilos)
+end
+deactivate Coord
+
+== 2. Ejecución Concurrente en Pipeline ==
+
+par Etapa 1: Asignación (3 hilos compitiendo concurrentemente)
+    note over WA, QA: Los 3 hilos ejecutan Worker.run() en paralelo.\nCompiten de forma sincronizada por queueAssign.pop().
+    loop cada uno de los 3 hilos mientras queueAssign no esté vacía (pop() != null)
+        WA -> QA : pop()
+        activate WA
+        QA --> WA : order
+        WA -> WA : sleep(assignmentDelayMillis)
+        
+        WA -> PM : reserveAvailablePrinter(order.getId())
+        activate PM
+        note over PM: synchronized (Monitor):\nSi no hay AVAILABLE: wait().\nAl haber disponible: assignOrder(id)\nstate = RESERVED, count++
+        PM --> WA : printer
+        deactivate PM
+        
+        critical synchronized(order)
+            WA -> Ord : onAssigned(printer.getId())
+            note over Ord: state = WAITING_VALIDATION\nassignmentCount++
+            WA -> Log : logEvent(id, ASSIGNMENT, ORDER_STATE_CHANGED,\nCREATED, WAITING_VALIDATION, printerId)
+        end
+        
+        WA -> QV : push(order)
+        note over QV, WA: notifyAll() despierta a hilos de validación bloqueados en pop()
+        note over PM: La impresora permanece RESERVED
+        deactivate WA
+    end
+
+else Etapa 2: Validación (2 hilos compitiendo concurrentemente)
+    note over WV, QV: Los 2 hilos consumen en paralelo de queueValid.
+    loop cada uno de los 2 hilos mientras queueValid tenga órdenes (pop() != null)
+        WV -> QV : pop()
+        activate WV
+        QV --> WV : order
+        WV -> WV : sleep(validationDelayMillis)
+        
+        WV -> Decider : isModelValid(order.getId(), config)
+        Decider --> WV : esValida (boolean)
+        
+        critical synchronized(order)
+            WV -> Ord : onValidationResult(esValida)
+            note over Ord: validationCount++\nstate = (esValida ? READY_TO_PRINT : REJECTED)
+            WV -> Log : logEvent(id, VALIDATION, ORDER_STATE_CHANGED,\nWAITING_VALIDATION, nuevoEstado, printerId)
+        end
+        
+        alt esValida == true
+            WV -> QP : push(order)
+            note over PM: La impresora permanece RESERVED para la etapa de impresión
+        else esValida == false (REJECTED)
+            WV -> PM : releasePrinter(printer, false)
+            activate PM
+            note over PM: synchronized (Monitor):\nprinter.release() -> AVAILABLE\nnotifyAll() despierta hilos en reserveAvailablePrinter
+            deactivate PM
+            note over Ord: Estado terminal: REJECTED\nOrden finalizada
+        end
+        deactivate WV
+    end
+
+else Etapa 3: Impresión (3 hilos compitiendo concurrentemente)
+    note over WP, QP: Los 3 hilos consumen en paralelo de queuePrint.
+    loop cada uno de los 3 hilos mientras queuePrint tenga órdenes (pop() != null)
+        WP -> QP : pop()
+        activate WP
+        QP --> WP : order
+        WP -> WP : sleep(printingDelayMillis)
+        
+        WP -> Decider : isPrintSuccessful(order.getId(), config)
+        Decider --> WP : esExitosa (boolean)
+        
+        critical synchronized(order)
+            WP -> Ord : onPrintResult(esExitosa)
+            note over Ord: printingCount++\nstate = (esExitosa ? PRINTED : PRINT_FAILED)
+            WP -> Log : logEvent(id, PRINTING, ORDER_STATE_CHANGED,\nREADY_TO_PRINT, nuevoEstado, printerId)
+        end
+        
+        WP -> PM : releasePrinter(printer, !esExitosa)
+        activate PM
+        alt esExitosa == true
+            note over PM: synchronized:\nprinter.release() -> AVAILABLE\nnotifyAll() despierta hilos esperando impresora
+        else esExitosa == false
+            note over PM: synchronized:\nprinter.markOutOfService() -> OUT_OF_SERVICE\nnotifyAll()
+        end
+        deactivate PM
+        
+        alt esExitosa == true
+            WP -> QQ : push(order)
+        else esExitosa == false (PRINT_FAILED)
+            note over Ord: Estado terminal: PRINT_FAILED\nOrden finalizada
+        end
+        deactivate WP
+    end
+
+else Etapa 4: Control de Calidad (2 hilos compitiendo concurrentemente)
+    note over WQ, QQ: Los 2 hilos consumen en paralelo de queueQual.
+    loop cada uno de los 2 hilos mientras queueQual tenga órdenes (pop() != null)
+        WQ -> QQ : pop()
+        activate WQ
+        QQ --> WQ : order
+        WQ -> WQ : sleep(qualityControlDelayMillis)
+        
+        WQ -> Decider : isQualityApproved(order.getId(), config)
+        Decider --> WQ : esAprobada (boolean)
+        
+        critical synchronized(order)
+            WQ -> Ord : onQualityResult(esAprobada)
+            note over Ord: qualityControlCount++\nstate = (esAprobada ? APPROVED : DEFECTIVE)
+            WQ -> Log : logEvent(id, QUALITY_CONTROL, ORDER_STATE_CHANGED,\nPRINTED, nuevoEstado, printerId)
+        end
+        note over Ord: Estado terminal: APPROVED o DEFECTIVE\nOrden finalizada (no hay etapa posterior)
+        deactivate WQ
+    end
+end
+
+== 3. Terminación y Cierre Escalonado (Graceful Shutdown) ==
+
+Sim -> Coord : awaitStageAndCloseOutput(0, queueValid)
+activate Coord
+note over Coord: Espera con join() a los 3 hilos de Asignación.\nAl finalizar todos: queueValid.close() (notifyAll).
+loop i = 1 .. 3
+    Coord -> WA : join()
+end
+deactivate Coord
+
+Sim -> Coord : awaitStageAndCloseOutput(1, queuePrint)
+activate Coord
+note over Coord: Espera con join() a los 2 hilos de Validación.\nAl finalizar todos: queuePrint.close() (notifyAll).
+loop i = 1 .. 2
+    Coord -> WV : join()
+end
+deactivate Coord
+
+Sim -> Coord : awaitStageAndCloseOutput(2, queueQual)
+activate Coord
+note over Coord: Espera con join() a los 3 hilos de Impresión.\nAl finalizar todos: queueQual.close() (notifyAll).
+loop i = 1 .. 3
+    Coord -> WP : join()
+end
+deactivate Coord
+
+Sim -> Coord : awaitStageAndCloseOutput(3, null)
+activate Coord
+note over Coord: Espera con join() a los 2 hilos de Calidad.\nTodos los hilos (10 en total) han finalizado.
+loop i = 1 .. 2
+    Coord -> WQ : join()
+end
+deactivate Coord
+
+Sim -> Log : close()
+note over Log: Flush y cierre de eventos.csv
+
+Sim -> Sim : generarElementosCsv(outputDirectory)
+note over Sim: Escribe elementos.csv con métricas de cada orden
+
+Sim -> Sim : generarResumenProperties(outputDirectory)
+note over Sim: Escribe resumen.properties con métricas globales
+
+Sim -> Sim : validarInvariantes()
+note over Sim: Verifica que no queden órdenes en estados intermedios\nni impresoras en estado RESERVED
+
+Sim --> Main : SimulationResult
+@enduml
