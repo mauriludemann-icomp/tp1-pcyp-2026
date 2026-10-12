@@ -42,5 +42,6 @@ public abstract class Worker implements Runnable {
      * Lógica específica de procesamiento de cada etapa.
      * Cada clase hija debe implementar su algoritmo aquí.
      */
-    protected abstract void processOrder(Order order);
+    protected abstract void processOrder(Order order)
+        throws InterruptedException;
 }

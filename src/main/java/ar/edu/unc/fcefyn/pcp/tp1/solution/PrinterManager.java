@@ -17,7 +17,7 @@ public class PrinterManager {
 
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
-                Printer printer = new Printer(r, c);
+                Printer printer = new Printer(String.format("P-%d-%d", r, c), r, c);
                 matrix[r][c] = printer;
                 printerList.add(printer);
             }
@@ -37,7 +37,7 @@ public class PrinterManager {
             availablePrinter = findAvailablePrinter();
         }
 
-        availablePrinter.reserveForOrder(orderId);
+        availablePrinter.assignOrder(orderId);
         return availablePrinter;
     }
 
@@ -46,8 +46,12 @@ public class PrinterManager {
      * Si printFailed es true, la impresora pasa a OUT_OF_SERVICE.
      */
     public synchronized void releasePrinter(Printer printer, boolean printFailed) {
-        printer.release(printFailed);
-        notifyAll(); // Despierta a los hilos de asignación esperando por impresoras
+        if (printFailed) {
+            printer.markOutOfService();
+        } else {
+            printer.release();
+        }
+        notifyAll();
     }
 
     private Printer findAvailablePrinter() {
@@ -66,5 +70,14 @@ public class PrinterManager {
             snapshots.add(printer.toSnapshot());
         }
         return snapshots;
+    }
+
+    public synchronized Printer getPrinterById(String printerId) {
+        for (Printer printer : printerList) {
+            if (printer.getId().equals(printerId)) {
+                return printer;
+            }
+        }
+        return null;
     }
 }
