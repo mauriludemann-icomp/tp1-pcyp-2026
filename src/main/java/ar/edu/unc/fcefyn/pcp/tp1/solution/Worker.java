@@ -4,13 +4,13 @@ public abstract class Worker implements Runnable {
     protected WorkQueue inputQueue;
     protected WorkQueue outputQueue;
     protected EventLogger eventLogger;
-    protected String StageName;
+    protected String stageName;
 
     public Worker(WorkQueue inputQueue,WorkQueue outputQueue ,EventLogger eventLogger, String stageName) {
         this.inputQueue = inputQueue;
-        this.outputQueue = outputQueue ;
+        this.outputQueue = outputQueue;
         this.eventLogger = eventLogger;
-        this.StageName = stageName;
+        this.stageName = stageName;
     }
 
     /**

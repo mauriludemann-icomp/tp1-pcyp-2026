@@ -29,6 +29,9 @@ public class WorkQueue {
         while (queue.size() == capacity && !closed) {
             wait();
         }
+        if (order == null) {
+            throw new NullPointerException("La orden es null, no se puede agregar la orden");
+        }
         if (closed) {
             throw new IllegalStateException("La cola esta cerrada. No se puede agregar una orden.");
         }
