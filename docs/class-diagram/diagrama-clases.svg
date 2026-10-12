@@ -1,0 +1,827 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="4980" height="7457" viewBox="0 0 4980 7457"><rect width="100%" height="100%" fill="white"/><text x="60" y="60" font-family="Arial" font-size="36" font-weight="bold">Granja de impresión 3D · Diagrama de clases</text><text x="60" y="105" font-family="Arial" font-size="24">Propuesta de implementación · 22 tipos del proyecto + Runnable y Thread de Java · 30/09/2026</text><svg x="60" y="220" width="2400" height="3556" viewBox="0.00 0.00 812.00 1203.00">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(25.2 1178.2)">
+<title>G</title>
+<polygon fill="white" stroke="none" points="-25.2,25.2 -25.2,-1178.2 786.59,-1178.2 786.59,25.2 -25.2,25.2"/>
+<text xml:space="preserve" text-anchor="middle" x="380.7" y="-1127.4" font-family="Arial" font-size="24.00">1. Órdenes, impresoras y estados</text>
+<!-- Order -->
+<g id="node1" class="node">
+<title>Order</title>
+<polygon fill="#f6f0e4" stroke="none" points="22,-958 22,-996 303.73,-996 303.73,-958 22,-958"/>
+<text xml:space="preserve" text-anchor="start" x="119.15" y="-980.1" font-family="Arial" font-size="11.00">«class» · solution</text>
+<text xml:space="preserve" text-anchor="start" x="145.16" y="-967.3" font-family="Arial" font-weight="bold" font-size="13.00">Order</text>
+<text xml:space="preserve" text-anchor="start" x="29" y="-938" font-family="Arial" font-size="13.00">&#45;id: int {readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="29" y="-908.4" font-family="Arial" font-size="13.00">&#45;state: OrderState</text>
+<text xml:space="preserve" text-anchor="start" x="29" y="-878.8" font-family="Arial" font-size="13.00">&#45;assignedPrinter: Printer [0..1]</text>
+<text xml:space="preserve" text-anchor="start" x="29" y="-849.2" font-family="Arial" font-size="13.00">&#45;assignmentCount: int</text>
+<text xml:space="preserve" text-anchor="start" x="29" y="-819.6" font-family="Arial" font-size="13.00">&#45;validationCount: int</text>
+<text xml:space="preserve" text-anchor="start" x="29" y="-790" font-family="Arial" font-size="13.00">&#45;printingCount: int</text>
+<text xml:space="preserve" text-anchor="start" x="29" y="-760.4" font-family="Arial" font-size="13.00">&#45;qualityControlCount: int</text>
+<text xml:space="preserve" text-anchor="start" x="29" y="-730.8" font-family="Arial" font-size="13.00">~Order(id: int)</text>
+<text xml:space="preserve" text-anchor="start" x="29" y="-701.2" font-family="Arial" font-size="13.00">+getId(): int</text>
+<text xml:space="preserve" text-anchor="start" x="29" y="-671.6" font-family="Arial" font-size="13.00">~getState(): OrderState</text>
+<text xml:space="preserve" text-anchor="start" x="29" y="-642" font-family="Arial" font-size="13.00">~getAssignedPrinter(): Printer [0..1]</text>
+<text xml:space="preserve" text-anchor="start" x="29" y="-612.4" font-family="Arial" font-size="13.00">~assign(printer: Printer): void</text>
+<text xml:space="preserve" text-anchor="start" x="29" y="-582.8" font-family="Arial" font-size="13.00">~finishValidation(valid: boolean): void</text>
+<text xml:space="preserve" text-anchor="start" x="29" y="-553.2" font-family="Arial" font-size="13.00">~finishPrinting(successful: boolean): void</text>
+<text xml:space="preserve" text-anchor="start" x="29" y="-523.6" font-family="Arial" font-size="13.00">~finishQualityControl(approved: boolean): void</text>
+<text xml:space="preserve" text-anchor="start" x="29" y="-494" font-family="Arial" font-size="13.00">~toSnapshot(): OrderSnapshot</text>
+<polygon fill="#66758a" stroke="#66758a" points="21,-958 21,-958 304.73,-958 304.73,-958 21,-958"/>
+<polygon fill="#66758a" stroke="#66758a" points="21,-750.8 21,-750.8 304.73,-750.8 304.73,-750.8 21,-750.8"/>
+<polygon fill="none" stroke="#66758a" points="21,-483.4 21,-997 304.73,-997 304.73,-483.4 21,-483.4"/>
+</g>
+<!-- Printer -->
+<g id="node2" class="node">
+<title>Printer</title>
+<polygon fill="#f6f0e4" stroke="none" points="521.34,-928.4 521.34,-966.4 760.39,-966.4 760.39,-928.4 521.34,-928.4"/>
+<text xml:space="preserve" text-anchor="start" x="597.15" y="-950.5" font-family="Arial" font-size="11.00">«class» · solution</text>
+<text xml:space="preserve" text-anchor="start" x="619.91" y="-937.7" font-family="Arial" font-weight="bold" font-size="13.00">Printer</text>
+<text xml:space="preserve" text-anchor="start" x="528.34" y="-908.4" font-family="Arial" font-size="13.00">&#45;id: String {readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="528.34" y="-878.8" font-family="Arial" font-size="13.00">&#45;row: int {readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="528.34" y="-849.2" font-family="Arial" font-size="13.00">&#45;column: int {readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="528.34" y="-819.6" font-family="Arial" font-size="13.00">&#45;state: PrinterState</text>
+<text xml:space="preserve" text-anchor="start" x="528.34" y="-790" font-family="Arial" font-size="13.00">&#45;usageCount: int</text>
+<text xml:space="preserve" text-anchor="start" x="528.34" y="-760.4" font-family="Arial" font-size="13.00">&#45;assignedOrder: Order [0..1]</text>
+<text xml:space="preserve" text-anchor="start" x="528.34" y="-730.8" font-family="Arial" font-size="13.00">~Printer(id: String, row: int, column: int)</text>
+<text xml:space="preserve" text-anchor="start" x="528.34" y="-701.2" font-family="Arial" font-size="13.00">+getId(): String</text>
+<text xml:space="preserve" text-anchor="start" x="528.34" y="-671.6" font-family="Arial" font-size="13.00">~getState(): PrinterState</text>
+<text xml:space="preserve" text-anchor="start" x="528.34" y="-642" font-family="Arial" font-size="13.00">~getAssignedOrder(): Order [0..1]</text>
+<text xml:space="preserve" text-anchor="start" x="528.34" y="-612.4" font-family="Arial" font-size="13.00">~reserve(order: Order): void</text>
+<text xml:space="preserve" text-anchor="start" x="528.34" y="-582.8" font-family="Arial" font-size="13.00">~release(order: Order): void</text>
+<text xml:space="preserve" text-anchor="start" x="528.34" y="-553.2" font-family="Arial" font-size="13.00">~disable(order: Order): void</text>
+<text xml:space="preserve" text-anchor="start" x="528.34" y="-523.6" font-family="Arial" font-size="13.00">~toSnapshot(): PrinterSnapshot</text>
+<polygon fill="#66758a" stroke="#66758a" points="520.34,-928.4 520.34,-928.4 761.39,-928.4 761.39,-928.4 520.34,-928.4"/>
+<polygon fill="#66758a" stroke="#66758a" points="520.34,-750.8 520.34,-750.8 761.39,-750.8 761.39,-750.8 520.34,-750.8"/>
+<polygon fill="none" stroke="#66758a" points="520.34,-513 520.34,-967.4 761.39,-967.4 761.39,-513 520.34,-513"/>
+</g>
+<!-- Order&#45;&gt;Printer -->
+<g id="edge3" class="edge">
+<title>Order&#45;&gt;Printer</title>
+<path fill="none" stroke="#52647a" d="M304.66,-740.2C370.12,-740.2 447.3,-740.2 511.19,-740.2"/>
+<polygon fill="#52647a" stroke="#52647a" points="519.3,-740.2 510.8,-744.03 516.27,-740.2 510.8,-740.2 510.8,-740.2 510.8,-740.2 516.27,-740.2 510.8,-736.38 519.3,-740.2"/>
+<text xml:space="preserve" text-anchor="middle" x="412.54" y="-746.5" font-family="Arial" font-size="11.00" fill="#34445b">historial</text>
+<text xml:space="preserve" text-anchor="middle" x="500.58" y="-746.2" font-family="Arial" font-size="11.00" fill="#34445b">0..1</text>
+<text xml:space="preserve" text-anchor="middle" x="324.6" y="-727.6" font-family="Arial" font-size="11.00" fill="#34445b">0..*</text>
+</g>
+<!-- OrderState -->
+<g id="node3" class="node">
+<title>OrderState</title>
+<polygon fill="#e8f0f8" stroke="none" points="85.8,-365.2 85.8,-403.2 239.93,-403.2 239.93,-365.2 85.8,-365.2"/>
+<text xml:space="preserve" text-anchor="start" x="112.73" y="-387.3" font-family="Arial" font-size="11.00">«enumeration» · api</text>
+<text xml:space="preserve" text-anchor="start" x="129.27" y="-374.5" font-family="Arial" font-weight="bold" font-size="13.00">OrderState</text>
+<text xml:space="preserve" text-anchor="start" x="92.8" y="-345.2" font-family="Arial" font-size="13.00">CREATED</text>
+<text xml:space="preserve" text-anchor="start" x="92.8" y="-315.6" font-family="Arial" font-size="13.00">WAITING_VALIDATION</text>
+<text xml:space="preserve" text-anchor="start" x="92.8" y="-286" font-family="Arial" font-size="13.00">READY_TO_PRINT</text>
+<text xml:space="preserve" text-anchor="start" x="92.8" y="-256.4" font-family="Arial" font-size="13.00">PRINTED</text>
+<text xml:space="preserve" text-anchor="start" x="92.8" y="-226.8" font-family="Arial" font-size="13.00">APPROVED</text>
+<text xml:space="preserve" text-anchor="start" x="92.8" y="-197.2" font-family="Arial" font-size="13.00">REJECTED</text>
+<text xml:space="preserve" text-anchor="start" x="92.8" y="-167.6" font-family="Arial" font-size="13.00">PRINT_FAILED</text>
+<text xml:space="preserve" text-anchor="start" x="92.8" y="-138" font-family="Arial" font-size="13.00">DEFECTIVE</text>
+<text xml:space="preserve" text-anchor="start" x="92.8" y="-108.4" font-family="Arial" font-size="13.00">+isTerminal(): boolean</text>
+<polygon fill="#66758a" stroke="#66758a" points="84.8,-365.2 84.8,-365.2 240.93,-365.2 240.93,-365.2 84.8,-365.2"/>
+<polygon fill="#66758a" stroke="#66758a" points="84.8,-128.4 84.8,-128.4 240.93,-128.4 240.93,-128.4 84.8,-128.4"/>
+<polygon fill="none" stroke="#66758a" points="84.8,-97.8 84.8,-404.2 240.93,-404.2 240.93,-97.8 84.8,-97.8"/>
+</g>
+<!-- Order&#45;&gt;OrderState -->
+<g id="edge5" class="edge">
+<title>Order&#45;&gt;OrderState</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M162.87,-483.47C162.87,-459.75 162.87,-436.18 162.87,-413.67"/>
+<polygon fill="#52647a" stroke="#52647a" points="162.87,-405.31 166.69,-413.81 162.87,-408.34 162.87,-413.81 162.87,-413.81 162.87,-413.81 162.87,-408.34 159.04,-413.81 162.87,-405.31"/>
+<text xml:space="preserve" text-anchor="middle" x="174.79" y="-440.5" font-family="Arial" font-size="11.00" fill="#34445b">state</text>
+</g>
+<!-- Printer&#45;&gt;Order -->
+<g id="edge4" class="edge">
+<title>Printer&#45;&gt;Order</title>
+<path fill="none" stroke="#52647a" d="M520.54,-730.92C473.62,-727.3 430.88,-724 430.88,-724 430.88,-724 394.2,-724 394.2,-724 394.2,-724 357.81,-726.55 313.9,-729.62"/>
+<polygon fill="#52647a" stroke="#52647a" points="305.64,-730.2 313.86,-725.79 308.67,-729.99 314.12,-729.61 314.12,-729.61 314.12,-729.61 308.67,-729.99 314.39,-733.42 305.64,-730.2"/>
+<text xml:space="preserve" text-anchor="middle" x="412.54" y="-727.3" font-family="Arial" font-size="11.00" fill="#34445b">reserva</text>
+<text xml:space="preserve" text-anchor="middle" x="323.67" y="-716.32" font-family="Arial" font-size="11.00" fill="#34445b">0..1</text>
+<text xml:space="preserve" text-anchor="middle" x="499.95" y="-735.35" font-family="Arial" font-size="11.00" fill="#34445b">0..1</text>
+</g>
+<!-- PrinterState -->
+<g id="node4" class="node">
+<title>PrinterState</title>
+<polygon fill="#e8f0f8" stroke="none" points="575.35,-276.4 575.35,-314.4 706.38,-314.4 706.38,-276.4 575.35,-276.4"/>
+<text xml:space="preserve" text-anchor="start" x="590.73" y="-298.5" font-family="Arial" font-size="11.00">«enumeration» · api</text>
+<text xml:space="preserve" text-anchor="start" x="604.02" y="-285.7" font-family="Arial" font-weight="bold" font-size="13.00">PrinterState</text>
+<text xml:space="preserve" text-anchor="start" x="582.35" y="-256.4" font-family="Arial" font-size="13.00">AVAILABLE</text>
+<text xml:space="preserve" text-anchor="start" x="582.35" y="-226.8" font-family="Arial" font-size="13.00">RESERVED</text>
+<text xml:space="preserve" text-anchor="start" x="582.35" y="-197.2" font-family="Arial" font-size="13.00">OUT_OF_SERVICE</text>
+<polygon fill="#66758a" stroke="#66758a" points="574.35,-276.4 574.35,-276.4 707.38,-276.4 707.38,-276.4 574.35,-276.4"/>
+<polygon fill="none" stroke="#66758a" points="574.35,-186.6 574.35,-315.4 707.38,-315.4 707.38,-186.6 574.35,-186.6"/>
+</g>
+<!-- Printer&#45;&gt;PrinterState -->
+<g id="edge6" class="edge">
+<title>Printer&#45;&gt;PrinterState</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M640.87,-513.07C640.87,-444.96 640.87,-375.03 640.87,-324.7"/>
+<polygon fill="#52647a" stroke="#52647a" points="640.87,-316.44 644.69,-324.94 640.87,-319.47 640.87,-324.94 640.87,-324.94 640.87,-324.94 640.87,-319.47 637.04,-324.94 640.87,-316.44"/>
+<text xml:space="preserve" text-anchor="middle" x="652.79" y="-440.5" font-family="Arial" font-size="11.00" fill="#34445b">state</text>
+</g>
+<!-- SimulationMonitor -->
+<g id="node5" class="node">
+<title>SimulationMonitor</title>
+<polygon fill="#f6f0e4" stroke="none" points="320.58,-1077.2 320.58,-1115.2 483.15,-1115.2 483.15,-1077.2 320.58,-1077.2"/>
+<text xml:space="preserve" text-anchor="start" x="327.58" y="-1099.3" font-family="Arial" font-size="11.00">«class» · solution · referencia</text>
+<text xml:space="preserve" text-anchor="start" x="344.82" y="-1086.5" font-family="Arial" font-weight="bold" font-size="13.00">SimulationMonitor</text>
+<polygon fill="none" stroke="#66758a" points="319.58,-1076.2 319.58,-1116.2 484.15,-1116.2 484.15,-1076.2 319.58,-1076.2"/>
+</g>
+<!-- SimulationMonitor&#45;&gt;Order -->
+<g id="edge1" class="edge">
+<title>SimulationMonitor&#45;&gt;Order</title>
+<path fill="none" stroke="#52647a" d="M389.35,-1076.67C373.17,-1052.7 343.11,-1008.18 310.06,-959.22"/>
+<polygon fill="#52647a" stroke="#52647a" points="305.42,-952.34 313.34,-957.25 307.11,-954.85 310.17,-959.39 310.17,-959.39 310.17,-959.39 307.11,-954.85 307,-961.53 305.42,-952.34"/>
+<text xml:space="preserve" text-anchor="middle" x="377.39" y="-1033.3" font-family="Arial" font-size="11.00" fill="#34445b">orders</text>
+<text xml:space="preserve" text-anchor="middle" x="323.6" y="-959.35" font-family="Arial" font-size="11.00" fill="#34445b">1..*</text>
+<text xml:space="preserve" text-anchor="middle" x="370.49" y="-1062.04" font-family="Arial" font-size="11.00" fill="#34445b">1</text>
+</g>
+<!-- SimulationMonitor&#45;&gt;Printer -->
+<g id="edge2" class="edge">
+<title>SimulationMonitor&#45;&gt;Printer</title>
+<path fill="none" stroke="#52647a" d="M414.38,-1076.67C434.04,-1047.54 474.2,-988.06 515.31,-927.17"/>
+<polygon fill="#52647a" stroke="#52647a" points="519.91,-920.36 518.32,-929.54 518.21,-922.87 515.15,-927.4 515.15,-927.4 515.15,-927.4 518.21,-922.87 511.98,-925.26 519.91,-920.36"/>
+<text xml:space="preserve" text-anchor="middle" x="479.83" y="-1033.3" font-family="Arial" font-size="11.00" fill="#34445b">printers / matriz</text>
+<text xml:space="preserve" text-anchor="middle" x="517.14" y="-937.78" font-family="Arial" font-size="11.00" fill="#34445b">1..*</text>
+<text xml:space="preserve" text-anchor="middle" x="417.83" y="-1051.64" font-family="Arial" font-size="11.00" fill="#34445b">1</text>
+</g>
+<!-- note -->
+<g id="node6" class="node">
+<title>note</title>
+<polygon fill="none" stroke="black" points="319.73,-64.8 0,-64.8 0,0 325.73,0 325.73,-58.8 319.73,-64.8"/>
+<polyline fill="none" stroke="black" points="319.73,-64.8 319.73,-58.8"/>
+<polyline fill="none" stroke="black" points="325.73,-58.8 319.73,-58.8"/>
+<text xml:space="preserve" text-anchor="middle" x="162.87" y="-43.2" font-family="Arial" font-size="12.00">Una misma impresora puede figurar en varios historiales.</text>
+<text xml:space="preserve" text-anchor="middle" x="162.87" y="-28.8" font-family="Arial" font-size="12.00">La reserva actual se limpia al liberar o deshabilitar.</text>
+<text xml:space="preserve" text-anchor="middle" x="162.87" y="-14.4" font-family="Arial" font-size="12.00">Las entidades se modifican únicamente bajo el monitor.</text>
+</g>
+</g>
+</svg>
+<svg x="2520" y="220" width="2400" height="2875" viewBox="0.00 0.00 1177.00 1410.00">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(25.2 1384.6)">
+<title>G</title>
+<polygon fill="white" stroke="none" points="-25.2,25.2 -25.2,-1384.6 1152.08,-1384.6 1152.08,25.2 -25.2,25.2"/>
+<text xml:space="preserve" text-anchor="middle" x="563.44" y="-1333.8" font-family="Arial" font-size="24.00">2. Trabajadores y coordinación de una ejecución</text>
+<!-- AssignmentWorker -->
+<g id="node1" class="node">
+<title>AssignmentWorker</title>
+<polygon fill="#f6f0e4" stroke="none" points="887.89,-1283.6 887.89,-1321.6 1125.88,-1321.6 1125.88,-1283.6 887.89,-1283.6"/>
+<text xml:space="preserve" text-anchor="start" x="963.17" y="-1305.7" font-family="Arial" font-size="11.00">«class» · solution</text>
+<text xml:space="preserve" text-anchor="start" x="947.29" y="-1292.9" font-family="Arial" font-weight="bold" font-size="13.00">AssignmentWorker</text>
+<text xml:space="preserve" text-anchor="start" x="894.89" y="-1263.6" font-family="Arial" font-size="13.00">&#45;monitor: SimulationMonitor {readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="894.89" y="-1234" font-family="Arial" font-size="13.00">&#45;config: SimulationConfig {readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="894.89" y="-1204.4" font-family="Arial" font-size="13.00">+AssignmentWorker(monitor, config)</text>
+<text xml:space="preserve" text-anchor="start" x="894.89" y="-1174.8" font-family="Arial" font-size="13.00">+run(): void</text>
+<polygon fill="#66758a" stroke="#66758a" points="886.89,-1283.6 886.89,-1283.6 1126.88,-1283.6 1126.88,-1283.6 886.89,-1283.6"/>
+<polygon fill="#66758a" stroke="#66758a" points="886.89,-1224.4 886.89,-1224.4 1126.88,-1224.4 1126.88,-1224.4 886.89,-1224.4"/>
+<polygon fill="none" stroke="#66758a" points="886.89,-1164.2 886.89,-1322.6 1126.88,-1322.6 1126.88,-1164.2 886.89,-1164.2"/>
+</g>
+<!-- SimulationMonitor -->
+<g id="node5" class="node">
+<title>SimulationMonitor</title>
+<polygon fill="#f6f0e4" stroke="none" points="673.49,-1046 673.49,-1084 1072.28,-1084 1072.28,-1046 673.49,-1046"/>
+<text xml:space="preserve" text-anchor="start" x="829.17" y="-1068.1" font-family="Arial" font-size="11.00">«class» · solution</text>
+<text xml:space="preserve" text-anchor="start" x="815.83" y="-1055.3" font-family="Arial" font-weight="bold" font-size="13.00">SimulationMonitor</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-1026" font-family="Arial" font-size="13.00">&#45;config: SimulationConfig {readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-996.4" font-family="Arial" font-size="13.00">&#45;orders: List&lt;Order&gt; {readOnly ref}</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-966.8" font-family="Arial" font-size="13.00">&#45;printers: Printer[][] {readOnly ref}</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-937.2" font-family="Arial" font-size="13.00">&#45;assignmentQueue: Deque&lt;Order&gt; {readOnly ref}</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-907.6" font-family="Arial" font-size="13.00">&#45;validationQueue: Deque&lt;Order&gt; {readOnly ref}</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-878" font-family="Arial" font-size="13.00">&#45;printingQueue: Deque&lt;Order&gt; {readOnly ref}</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-848.4" font-family="Arial" font-size="13.00">&#45;qualityControlQueue: Deque&lt;Order&gt; {readOnly ref}</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-818.8" font-family="Arial" font-size="13.00">&#45;processedOrders: int</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-789.2" font-family="Arial" font-size="13.00">&#45;eventLogger: EventLogger {readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-759.6" font-family="Arial" font-size="13.00">&#45;cancelled: boolean</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-730" font-family="Arial" font-size="13.00">&#45;failure: Throwable [0..1]</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-700.4" font-family="Arial" font-size="13.00">+SimulationMonitor(config: SimulationConfig, logger: EventLogger)</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-670.8" font-family="Arial" font-size="13.00">+takeForAssignment(): Order [0..1]</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-641.2" font-family="Arial" font-size="13.00">+assignPrinter(order: Order): boolean</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-611.6" font-family="Arial" font-size="13.00">+takeForValidation(): Order [0..1]</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-582" font-family="Arial" font-size="13.00">+completeValidation(order: Order, valid: boolean): void</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-552.4" font-family="Arial" font-size="13.00">+takeForPrinting(): Order [0..1]</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-522.8" font-family="Arial" font-size="13.00">+completePrinting(order: Order, successful: boolean): void</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-493.2" font-family="Arial" font-size="13.00">+takeForQualityControl(): Order [0..1]</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-463.6" font-family="Arial" font-size="13.00">+completeQualityControl(order: Order, approved: boolean): void</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-434" font-family="Arial" font-size="13.00">+awaitCompletion(): void</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-404.4" font-family="Arial" font-size="13.00">+cancel(cause: Throwable): void</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-374.8" font-family="Arial" font-size="13.00">+getFailure(): Throwable [0..1]</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-345.2" font-family="Arial" font-size="13.00">+getProcessedOrders(): int</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-315.6" font-family="Arial" font-size="13.00">+getRemainingIntermediateOrders(): int</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-286" font-family="Arial" font-size="13.00">+getOrderSnapshots(): List&lt;OrderSnapshot&gt;</text>
+<text xml:space="preserve" text-anchor="start" x="680.49" y="-256.4" font-family="Arial" font-size="13.00">+getPrinterSnapshots(): List&lt;PrinterSnapshot&gt;</text>
+<polygon fill="#66758a" stroke="#66758a" points="672.49,-1046 672.49,-1046 1073.28,-1046 1073.28,-1046 672.49,-1046"/>
+<polygon fill="#66758a" stroke="#66758a" points="672.49,-720.4 672.49,-720.4 1073.28,-720.4 1073.28,-720.4 672.49,-720.4"/>
+<polygon fill="none" stroke="#66758a" points="672.49,-245.8 672.49,-1085 1073.28,-1085 1073.28,-245.8 672.49,-245.8"/>
+</g>
+<!-- AssignmentWorker&#45;&gt;SimulationMonitor -->
+<g id="edge3" class="edge">
+<title>AssignmentWorker&#45;&gt;SimulationMonitor</title>
+<path fill="none" stroke="#52647a" d="M988.74,-1164.42C983.93,-1143.73 978.38,-1119.87 972.37,-1094.04"/>
+<polygon fill="#52647a" stroke="#52647a" points="970.5,-1086.01 976.15,-1093.42 971.19,-1088.96 972.43,-1094.29 972.43,-1094.29 972.43,-1094.29 971.19,-1088.96 968.7,-1095.15 970.5,-1086.01"/>
+<text xml:space="preserve" text-anchor="middle" x="997.95" y="-1121.3" font-family="Arial" font-size="11.00" fill="#34445b">monitor</text>
+<text xml:space="preserve" text-anchor="middle" x="983.8" y="-1098.84" font-family="Arial" font-size="11.00" fill="#34445b">1</text>
+<text xml:space="preserve" text-anchor="middle" x="975.17" y="-1143.81" font-family="Arial" font-size="11.00" fill="#34445b">1..*</text>
+</g>
+<!-- Runnable -->
+<g id="node6" class="node">
+<title>Runnable</title>
+<polygon fill="#eeeeee" stroke="none" points="517.95,-661.2 517.95,-699.2 621.82,-699.2 621.82,-661.2 517.95,-661.2"/>
+<text xml:space="preserve" text-anchor="start" x="524.95" y="-683.3" font-family="Arial" font-size="11.00">«interface» · Java</text>
+<text xml:space="preserve" text-anchor="start" x="540.27" y="-670.5" font-family="Arial" font-weight="bold" font-size="13.00">Runnable</text>
+<text xml:space="preserve" text-anchor="start" x="524.95" y="-641.2" font-family="Arial" font-size="13.00">+run(): void</text>
+<polygon fill="#66758a" stroke="#66758a" points="516.95,-661.2 516.95,-661.2 622.82,-661.2 622.82,-661.2 516.95,-661.2"/>
+<polygon fill="none" stroke="#66758a" points="516.95,-630.6 516.95,-700.2 622.82,-700.2 622.82,-630.6 516.95,-630.6"/>
+</g>
+<!-- AssignmentWorker&#45;&gt;Runnable -->
+<g id="edge2" class="edge">
+<title>AssignmentWorker&#45;&gt;Runnable</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M920.27,-1164.32C892.54,-1139.33 868.88,-1118 868.88,-1118 868.88,-1118 647.88,-1085 647.88,-1085 647.88,-1085 597.92,-816.86 577.97,-709.79"/>
+<polygon fill="none" stroke="#52647a" points="580.89,-709.25 576.41,-701.44 575.04,-710.34 580.89,-709.25"/>
+</g>
+<!-- ValidationWorker -->
+<g id="node2" class="node">
+<title>ValidationWorker</title>
+<polygon fill="#f6f0e4" stroke="none" points="292.89,-1283.6 292.89,-1321.6 530.88,-1321.6 530.88,-1283.6 292.89,-1283.6"/>
+<text xml:space="preserve" text-anchor="start" x="368.17" y="-1305.7" font-family="Arial" font-size="11.00">«class» · solution</text>
+<text xml:space="preserve" text-anchor="start" x="358.43" y="-1292.9" font-family="Arial" font-weight="bold" font-size="13.00">ValidationWorker</text>
+<text xml:space="preserve" text-anchor="start" x="299.89" y="-1263.6" font-family="Arial" font-size="13.00">&#45;monitor: SimulationMonitor {readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="299.89" y="-1234" font-family="Arial" font-size="13.00">&#45;config: SimulationConfig {readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="299.89" y="-1204.4" font-family="Arial" font-size="13.00">+ValidationWorker(monitor, config)</text>
+<text xml:space="preserve" text-anchor="start" x="299.89" y="-1174.8" font-family="Arial" font-size="13.00">+run(): void</text>
+<polygon fill="#66758a" stroke="#66758a" points="291.89,-1283.6 291.89,-1283.6 531.88,-1283.6 531.88,-1283.6 291.89,-1283.6"/>
+<polygon fill="#66758a" stroke="#66758a" points="291.89,-1224.4 291.89,-1224.4 531.88,-1224.4 531.88,-1224.4 291.89,-1224.4"/>
+<polygon fill="none" stroke="#66758a" points="291.89,-1164.2 291.89,-1322.6 531.88,-1322.6 531.88,-1164.2 291.89,-1164.2"/>
+</g>
+<!-- ValidationWorker&#45;&gt;SimulationMonitor -->
+<g id="edge5" class="edge">
+<title>ValidationWorker&#45;&gt;SimulationMonitor</title>
+<path fill="none" stroke="#52647a" d="M531.63,-1177.82C546.65,-1169.72 556.88,-1164.2 556.88,-1164.2 556.88,-1164.2 726.88,-1131.2 726.88,-1131.2 726.88,-1131.2 731.26,-1117.26 738.5,-1094.21"/>
+<polygon fill="#52647a" stroke="#52647a" points="741.05,-1086.1 742.15,-1095.35 740.14,-1088.99 738.5,-1094.21 738.5,-1094.21 738.5,-1094.21 740.14,-1088.99 734.85,-1093.06 741.05,-1086.1"/>
+<text xml:space="preserve" text-anchor="middle" x="749.31" y="-1121.3" font-family="Arial" font-size="11.00" fill="#34445b">monitor</text>
+<text xml:space="preserve" text-anchor="middle" x="744.31" y="-1103.44" font-family="Arial" font-size="11.00" fill="#34445b">1</text>
+<text xml:space="preserve" text-anchor="middle" x="544.76" y="-1156.87" font-family="Arial" font-size="11.00" fill="#34445b">1..*</text>
+</g>
+<!-- ValidationWorker&#45;&gt;Runnable -->
+<g id="edge4" class="edge">
+<title>ValidationWorker&#45;&gt;Runnable</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M430.71,-1164.32C436.74,-1139.33 441.88,-1118 441.88,-1118 441.88,-1118 491.88,-1085 491.88,-1085 491.88,-1085 541.85,-816.86 561.8,-709.79"/>
+<polygon fill="none" stroke="#52647a" points="564.72,-710.34 563.36,-701.44 558.87,-709.25 564.72,-710.34"/>
+</g>
+<!-- OutcomeDecider -->
+<g id="node7" class="node">
+<title>OutcomeDecider</title>
+<polygon fill="#e8f0f8" stroke="none" points="24.17,-750 24.17,-788 465.6,-788 465.6,-750 24.17,-750"/>
+<text xml:space="preserve" text-anchor="start" x="212.79" y="-772.1" font-family="Arial" font-size="11.00">«class» · api</text>
+<text xml:space="preserve" text-anchor="start" x="192.87" y="-759.3" font-family="Arial" font-weight="bold" font-size="13.00">OutcomeDecider</text>
+<text xml:space="preserve" text-anchor="start" x="31.17" y="-730" font-family="Arial" font-size="13.00">&#45;VALIDATION_SALT: long {static, readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="31.17" y="-700.4" font-family="Arial" font-size="13.00">&#45;PRINTING_SALT: long {static, readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="31.17" y="-670.8" font-family="Arial" font-size="13.00">&#45;QUALITY_SALT: long {static, readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="31.17" y="-641.2" font-family="Arial" font-size="13.00">&#45;OutcomeDecider()</text>
+<text xml:space="preserve" text-anchor="start" x="31.17" y="-611.6" font-family="Arial" font-size="13.00">+isModelValid(orderId: int, config: SimulationConfig): boolean {static}</text>
+<text xml:space="preserve" text-anchor="start" x="31.17" y="-582" font-family="Arial" font-size="13.00">+isPrintSuccessful(orderId: int, config: SimulationConfig): boolean {static}</text>
+<text xml:space="preserve" text-anchor="start" x="31.17" y="-552.4" font-family="Arial" font-size="13.00">+isQualityApproved(orderId: int, config: SimulationConfig): boolean {static}</text>
+<polygon fill="#66758a" stroke="#66758a" points="23.17,-750 23.17,-750 466.6,-750 466.6,-750 23.17,-750"/>
+<polygon fill="#66758a" stroke="#66758a" points="23.17,-661.2 23.17,-661.2 466.6,-661.2 466.6,-661.2 23.17,-661.2"/>
+<polygon fill="none" stroke="#66758a" points="23.17,-541.8 23.17,-789 466.6,-789 466.6,-541.8 23.17,-541.8"/>
+</g>
+<!-- ValidationWorker&#45;&gt;OutcomeDecider -->
+<g id="edge10" class="edge">
+<title>ValidationWorker&#45;&gt;OutcomeDecider</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M378.6,-1164.26C370.7,-1145.72 364.52,-1131.2 364.52,-1131.2 364.52,-1131.2 314.18,-935.62 278.81,-798.2"/>
+<polygon fill="#52647a" stroke="#52647a" points="276.7,-790 282.52,-797.28 277.45,-792.94 278.82,-798.24 278.82,-798.24 278.82,-798.24 277.45,-792.94 275.11,-799.19 276.7,-790"/>
+<text xml:space="preserve" text-anchor="middle" x="395.7" y="-1121.3" font-family="Arial" font-size="11.00" fill="#34445b">isModelValid</text>
+</g>
+<!-- PrintingWorker -->
+<g id="node3" class="node">
+<title>PrintingWorker</title>
+<polygon fill="#f6f0e4" stroke="none" points="582.89,-1283.6 582.89,-1321.6 820.88,-1321.6 820.88,-1283.6 582.89,-1283.6"/>
+<text xml:space="preserve" text-anchor="start" x="658.17" y="-1305.7" font-family="Arial" font-size="11.00">«class» · solution</text>
+<text xml:space="preserve" text-anchor="start" x="654.94" y="-1292.9" font-family="Arial" font-weight="bold" font-size="13.00">PrintingWorker</text>
+<text xml:space="preserve" text-anchor="start" x="589.89" y="-1263.6" font-family="Arial" font-size="13.00">&#45;monitor: SimulationMonitor {readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="589.89" y="-1234" font-family="Arial" font-size="13.00">&#45;config: SimulationConfig {readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="589.89" y="-1204.4" font-family="Arial" font-size="13.00">+PrintingWorker(monitor, config)</text>
+<text xml:space="preserve" text-anchor="start" x="589.89" y="-1174.8" font-family="Arial" font-size="13.00">+run(): void</text>
+<polygon fill="#66758a" stroke="#66758a" points="581.89,-1283.6 581.89,-1283.6 821.88,-1283.6 821.88,-1283.6 581.89,-1283.6"/>
+<polygon fill="#66758a" stroke="#66758a" points="581.89,-1224.4 581.89,-1224.4 821.88,-1224.4 821.88,-1224.4 581.89,-1224.4"/>
+<polygon fill="none" stroke="#66758a" points="581.89,-1164.2 581.89,-1322.6 821.88,-1322.6 821.88,-1164.2 581.89,-1164.2"/>
+</g>
+<!-- PrintingWorker&#45;&gt;SimulationMonitor -->
+<g id="edge7" class="edge">
+<title>PrintingWorker&#45;&gt;SimulationMonitor</title>
+<path fill="none" stroke="#52647a" d="M784.1,-1164.26C803.61,-1145.72 818.88,-1131.2 818.88,-1131.2 818.88,-1131.2 820.49,-1117.38 823.15,-1094.51"/>
+<polygon fill="#52647a" stroke="#52647a" points="824.12,-1086.14 826.94,-1095.03 823.77,-1089.16 823.14,-1094.59 823.14,-1094.59 823.14,-1094.59 823.77,-1089.16 819.34,-1094.15 824.12,-1086.14"/>
+<text xml:space="preserve" text-anchor="middle" x="838.74" y="-1121.3" font-family="Arial" font-size="11.00" fill="#34445b">monitor</text>
+<text xml:space="preserve" text-anchor="middle" x="831.19" y="-1102.51" font-family="Arial" font-size="11.00" fill="#34445b">1</text>
+<text xml:space="preserve" text-anchor="middle" x="792.14" y="-1140.49" font-family="Arial" font-size="11.00" fill="#34445b">1..*</text>
+</g>
+<!-- PrintingWorker&#45;&gt;Runnable -->
+<g id="edge6" class="edge">
+<title>PrintingWorker&#45;&gt;Runnable</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M656.91,-1164.26C646.24,-1145.72 637.88,-1131.2 637.88,-1131.2 637.88,-1131.2 593.02,-824.54 576.17,-709.39"/>
+<polygon fill="none" stroke="#52647a" points="579.17,-709.3 574.99,-701.32 573.28,-710.17 579.17,-709.3"/>
+</g>
+<!-- PrintingWorker&#45;&gt;OutcomeDecider -->
+<g id="edge11" class="edge">
+<title>PrintingWorker&#45;&gt;OutcomeDecider</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M588.22,-1164.26C561.25,-1145.72 540.13,-1131.2 540.13,-1131.2 540.13,-1131.2 491.88,-1085 491.88,-1085 491.88,-1085 394.38,-919.76 321.89,-796.91"/>
+<polygon fill="#52647a" stroke="#52647a" points="317.78,-789.93 325.39,-795.31 319.32,-792.54 322.1,-797.25 322.1,-797.25 322.1,-797.25 319.32,-792.54 318.8,-799.2 317.78,-789.93"/>
+<text xml:space="preserve" text-anchor="middle" x="582.01" y="-1121.3" font-family="Arial" font-size="11.00" fill="#34445b">isPrintSuccessful</text>
+</g>
+<!-- QualityControlWorker -->
+<g id="node4" class="node">
+<title>QualityControlWorker</title>
+<polygon fill="#f6f0e4" stroke="none" points="1,-1283.6 1,-1321.6 240.77,-1321.6 240.77,-1283.6 1,-1283.6"/>
+<text xml:space="preserve" text-anchor="start" x="77.17" y="-1305.7" font-family="Arial" font-size="11.00">«class» · solution</text>
+<text xml:space="preserve" text-anchor="start" x="53.35" y="-1292.9" font-family="Arial" font-weight="bold" font-size="13.00">QualityControlWorker</text>
+<text xml:space="preserve" text-anchor="start" x="8" y="-1263.6" font-family="Arial" font-size="13.00">&#45;monitor: SimulationMonitor {readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="8" y="-1234" font-family="Arial" font-size="13.00">&#45;config: SimulationConfig {readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="8" y="-1204.4" font-family="Arial" font-size="13.00">+QualityControlWorker(monitor, config)</text>
+<text xml:space="preserve" text-anchor="start" x="8" y="-1174.8" font-family="Arial" font-size="13.00">+run(): void</text>
+<polygon fill="#66758a" stroke="#66758a" points="0,-1283.6 0,-1283.6 241.77,-1283.6 241.77,-1283.6 0,-1283.6"/>
+<polygon fill="#66758a" stroke="#66758a" points="0,-1224.4 0,-1224.4 241.77,-1224.4 241.77,-1224.4 0,-1224.4"/>
+<polygon fill="none" stroke="#66758a" points="0,-1164.2 0,-1322.6 241.77,-1322.6 241.77,-1164.2 0,-1164.2"/>
+</g>
+<!-- QualityControlWorker&#45;&gt;SimulationMonitor -->
+<g id="edge9" class="edge">
+<title>QualityControlWorker&#45;&gt;SimulationMonitor</title>
+<path fill="none" stroke="#52647a" d="M241.45,-1177.82C256.58,-1169.72 266.88,-1164.2 266.88,-1164.2 266.88,-1164.2 634.88,-1131.2 634.88,-1131.2 634.88,-1131.2 648.05,-1105.48 668.19,-1066.15"/>
+<polygon fill="#52647a" stroke="#52647a" points="672.04,-1058.64 671.57,-1067.94 670.66,-1061.33 668.17,-1066.2 668.17,-1066.2 668.17,-1066.2 670.66,-1061.33 664.76,-1064.46 672.04,-1058.64"/>
+<text xml:space="preserve" text-anchor="middle" x="659.89" y="-1121.3" font-family="Arial" font-size="11.00" fill="#34445b">monitor</text>
+<text xml:space="preserve" text-anchor="middle" x="671.78" y="-1076.24" font-family="Arial" font-size="11.00" fill="#34445b">1</text>
+<text xml:space="preserve" text-anchor="middle" x="254.64" y="-1156.91" font-family="Arial" font-size="11.00" fill="#34445b">1..*</text>
+</g>
+<!-- QualityControlWorker&#45;&gt;Runnable -->
+<g id="edge8" class="edge">
+<title>QualityControlWorker&#45;&gt;Runnable</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M241.45,-1177.82C256.58,-1169.72 266.88,-1164.2 266.88,-1164.2 266.88,-1164.2 491.88,-1085 491.88,-1085 491.88,-1085 541.85,-816.86 561.8,-709.79"/>
+<polygon fill="none" stroke="#52647a" points="564.72,-710.34 563.36,-701.44 558.87,-709.25 564.72,-710.34"/>
+</g>
+<!-- QualityControlWorker&#45;&gt;OutcomeDecider -->
+<g id="edge12" class="edge">
+<title>QualityControlWorker&#45;&gt;OutcomeDecider</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M113.67,-1164.26C111.96,-1145.72 110.62,-1131.2 110.62,-1131.2 110.62,-1131.2 110.62,-1118 110.62,-1118 110.62,-1118 166.12,-931.32 205.75,-798.01"/>
+<polygon fill="#52647a" stroke="#52647a" points="208.11,-790.08 209.36,-799.31 207.25,-792.98 205.69,-798.22 205.69,-798.22 205.69,-798.22 207.25,-792.98 202.02,-797.13 208.11,-790.08"/>
+<text xml:space="preserve" text-anchor="middle" x="155.25" y="-1121.3" font-family="Arial" font-size="11.00" fill="#34445b">isQualityApproved</text>
+</g>
+<!-- SimulationConfig -->
+<g id="node8" class="node">
+<title>SimulationConfig</title>
+<polygon fill="#e8f0f8" stroke="none" points="800.16,-127.6 800.16,-165.6 945.61,-165.6 945.61,-127.6 800.16,-127.6"/>
+<text xml:space="preserve" text-anchor="start" x="807.16" y="-149.7" font-family="Arial" font-size="11.00">«record» · api · referencia</text>
+<text xml:space="preserve" text-anchor="start" x="819.08" y="-136.9" font-family="Arial" font-weight="bold" font-size="13.00">SimulationConfig</text>
+<polygon fill="none" stroke="#66758a" points="799.16,-126.6 799.16,-166.6 946.61,-166.6 946.61,-126.6 799.16,-126.6"/>
+</g>
+<!-- SimulationMonitor&#45;&gt;SimulationConfig -->
+<g id="edge1" class="edge">
+<title>SimulationMonitor&#45;&gt;SimulationConfig</title>
+<path fill="none" stroke="#52647a" d="M872.88,-246.02C872.88,-217.37 872.88,-193.05 872.88,-175.75"/>
+<polygon fill="#52647a" stroke="#52647a" points="872.88,-167.61 876.71,-176.11 872.88,-170.64 872.88,-176.11 872.88,-176.11 872.88,-176.11 872.88,-170.64 869.06,-176.11 872.88,-167.61"/>
+<text xml:space="preserve" text-anchor="middle" x="887.56" y="-202.9" font-family="Arial" font-size="11.00" fill="#34445b">config</text>
+<text xml:space="preserve" text-anchor="middle" x="882.18" y="-183.03" font-family="Arial" font-size="11.00" fill="#34445b">1</text>
+<text xml:space="preserve" text-anchor="middle" x="863.59" y="-222.78" font-family="Arial" font-size="11.00" fill="#34445b">1</text>
+</g>
+<!-- note -->
+<g id="node9" class="node">
+<title>note</title>
+<polygon fill="none" stroke="black" points="1094.44,-93.6 645.33,-93.6 645.33,0 1100.44,0 1100.44,-87.6 1094.44,-93.6"/>
+<polyline fill="none" stroke="black" points="1094.44,-93.6 1094.44,-87.6"/>
+<polyline fill="none" stroke="black" points="1100.44,-87.6 1094.44,-87.6"/>
+<text xml:space="preserve" text-anchor="middle" x="872.88" y="-72" font-family="Arial" font-size="12.00">Todos los workers comparten el mismo monitor y la misma configuración.</text>
+<text xml:space="preserve" text-anchor="middle" x="872.88" y="-57.6" font-family="Arial" font-size="12.00">Constructores de workers: (monitor: SimulationMonitor, config: SimulationConfig).</text>
+<text xml:space="preserve" text-anchor="middle" x="872.88" y="-43.2" font-family="Arial" font-size="12.00">Métodos públicos del monitor: synchronized, salvo constructor.</text>
+<text xml:space="preserve" text-anchor="middle" x="872.88" y="-28.8" font-family="Arial" font-size="12.00">Demoras y OutcomeDecider fuera del bloqueo. wait dentro de while.</text>
+<text xml:space="preserve" text-anchor="middle" x="872.88" y="-14.4" font-family="Arial" font-size="12.00">Se omiten flechas repetidas a config y Order; están en el modelo completo.</text>
+</g>
+</g>
+</svg>
+<svg x="60" y="3836" width="2400" height="3561" viewBox="0.00 0.00 1201.00 1782.00">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(25.2 1756.6)">
+<title>G</title>
+<polygon fill="white" stroke="none" points="-25.2,25.2 -25.2,-1756.6 1175.86,-1756.6 1175.86,25.2 -25.2,25.2"/>
+<text xml:space="preserve" text-anchor="middle" x="575.33" y="-1705.8" font-family="Arial" font-size="24.00">3. Inicio, configuración y archivos</text>
+<!-- Main -->
+<g id="node1" class="node">
+<title>Main</title>
+<polygon fill="#f6f0e4" stroke="none" points="68.2,-1655.6 68.2,-1693.6 274.03,-1693.6 274.03,-1655.6 68.2,-1655.6"/>
+<text xml:space="preserve" text-anchor="start" x="137.18" y="-1677.7" font-family="Arial" font-size="11.00">«class» · app</text>
+<text xml:space="preserve" text-anchor="start" x="156.31" y="-1664.9" font-family="Arial" font-weight="bold" font-size="13.00">Main</text>
+<text xml:space="preserve" text-anchor="start" x="75.2" y="-1635.6" font-family="Arial" font-size="13.00">&#45;Main()</text>
+<text xml:space="preserve" text-anchor="start" x="75.2" y="-1606" font-family="Arial" font-size="13.00">+main(args: String[]): void {static}</text>
+<polygon fill="#66758a" stroke="#66758a" points="67.2,-1655.6 67.2,-1655.6 275.03,-1655.6 275.03,-1655.6 67.2,-1655.6"/>
+<polygon fill="none" stroke="#66758a" points="67.2,-1595.4 67.2,-1694.6 275.03,-1694.6 275.03,-1595.4 67.2,-1595.4"/>
+</g>
+<!-- ConfigurationLoader -->
+<g id="node2" class="node">
+<title>ConfigurationLoader</title>
+<polygon fill="#e8f0f8" stroke="none" points="1,-1477.2 1,-1515.2 263.23,-1515.2 263.23,-1477.2 1,-1477.2"/>
+<text xml:space="preserve" text-anchor="start" x="100.02" y="-1499.3" font-family="Arial" font-size="11.00">«class» · api</text>
+<text xml:space="preserve" text-anchor="start" x="67.84" y="-1486.5" font-family="Arial" font-weight="bold" font-size="13.00">ConfigurationLoader</text>
+<text xml:space="preserve" text-anchor="start" x="8" y="-1457.2" font-family="Arial" font-size="13.00">&#45;ConfigurationLoader()</text>
+<text xml:space="preserve" text-anchor="start" x="8" y="-1427.6" font-family="Arial" font-size="13.00">+load(path: Path): SimulationConfig {static}</text>
+<polygon fill="#66758a" stroke="#66758a" points="0,-1477.2 0,-1477.2 264.23,-1477.2 264.23,-1477.2 0,-1477.2"/>
+<polygon fill="none" stroke="#66758a" points="0,-1417 0,-1516.2 264.23,-1516.2 264.23,-1417 0,-1417"/>
+</g>
+<!-- Main&#45;&gt;ConfigurationLoader -->
+<g id="edge4" class="edge">
+<title>Main&#45;&gt;ConfigurationLoader</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M160.46,-1595.8C155.64,-1574.01 149.91,-1548.09 144.87,-1525.28"/>
+<polygon fill="#52647a" stroke="#52647a" points="143.09,-1517.24 148.66,-1524.71 143.74,-1520.2 144.93,-1525.54 144.93,-1525.54 144.93,-1525.54 143.74,-1520.2 141.19,-1526.37 143.09,-1517.24"/>
+<text xml:space="preserve" text-anchor="middle" x="185.8" y="-1552.5" font-family="Arial" font-size="11.00" fill="#34445b">carga archivo</text>
+</g>
+<!-- ConcurrentSimulation -->
+<g id="node5" class="node">
+<title>ConcurrentSimulation</title>
+<polygon fill="#f6f0e4" stroke="none" points="339.75,-1477.2 339.75,-1515.2 660.48,-1515.2 660.48,-1477.2 339.75,-1477.2"/>
+<text xml:space="preserve" text-anchor="start" x="456.4" y="-1499.3" font-family="Arial" font-size="11.00">«class» · solution</text>
+<text xml:space="preserve" text-anchor="start" x="431.86" y="-1486.5" font-family="Arial" font-weight="bold" font-size="13.00">ConcurrentSimulation</text>
+<text xml:space="preserve" text-anchor="start" x="346.75" y="-1457.2" font-family="Arial" font-size="13.00">+ConcurrentSimulation()</text>
+<text xml:space="preserve" text-anchor="start" x="346.75" y="-1427.6" font-family="Arial" font-size="13.00">+execute(config: SimulationConfig): SimulationResult</text>
+<polygon fill="#66758a" stroke="#66758a" points="338.75,-1477.2 338.75,-1477.2 661.48,-1477.2 661.48,-1477.2 338.75,-1477.2"/>
+<polygon fill="none" stroke="#66758a" points="338.75,-1417 338.75,-1516.2 661.48,-1516.2 661.48,-1417 338.75,-1417"/>
+</g>
+<!-- Main&#45;&gt;ConcurrentSimulation -->
+<g id="edge6" class="edge">
+<title>Main&#45;&gt;ConcurrentSimulation</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M261.45,-1595.56C304.79,-1572.33 356.81,-1544.44 401.21,-1520.63"/>
+<polygon fill="#52647a" stroke="#52647a" points="408.62,-1516.66 402.94,-1524.04 405.95,-1518.09 401.13,-1520.67 401.13,-1520.67 401.13,-1520.67 405.95,-1518.09 399.32,-1517.3 408.62,-1516.66"/>
+<text xml:space="preserve" text-anchor="middle" x="379.72" y="-1552.5" font-family="Arial" font-size="11.00" fill="#34445b">crea y ejecuta</text>
+</g>
+<!-- SimulationConfig -->
+<g id="node3" class="node">
+<title>SimulationConfig</title>
+<polygon fill="#e8f0f8" stroke="none" points="6.61,-1298.8 6.61,-1336.8 205.62,-1336.8 205.62,-1298.8 6.61,-1298.8"/>
+<text xml:space="preserve" text-anchor="start" x="70.96" y="-1320.9" font-family="Arial" font-size="11.00">«record» · api</text>
+<text xml:space="preserve" text-anchor="start" x="52.32" y="-1308.1" font-family="Arial" font-weight="bold" font-size="13.00">SimulationConfig</text>
+<text xml:space="preserve" text-anchor="start" x="13.61" y="-1278.8" font-family="Arial" font-size="13.00">&#45;totalOrders: int</text>
+<text xml:space="preserve" text-anchor="start" x="13.61" y="-1249.2" font-family="Arial" font-size="13.00">&#45;printerRows: int</text>
+<text xml:space="preserve" text-anchor="start" x="13.61" y="-1219.6" font-family="Arial" font-size="13.00">&#45;printerColumns: int</text>
+<text xml:space="preserve" text-anchor="start" x="13.61" y="-1190" font-family="Arial" font-size="13.00">&#45;assignmentThreads: int</text>
+<text xml:space="preserve" text-anchor="start" x="13.61" y="-1160.4" font-family="Arial" font-size="13.00">&#45;validationThreads: int</text>
+<text xml:space="preserve" text-anchor="start" x="13.61" y="-1130.8" font-family="Arial" font-size="13.00">&#45;printingThreads: int</text>
+<text xml:space="preserve" text-anchor="start" x="13.61" y="-1101.2" font-family="Arial" font-size="13.00">&#45;qualityControlThreads: int</text>
+<text xml:space="preserve" text-anchor="start" x="13.61" y="-1071.6" font-family="Arial" font-size="13.00">&#45;validModelPercentage: int</text>
+<text xml:space="preserve" text-anchor="start" x="13.61" y="-1042" font-family="Arial" font-size="13.00">&#45;printSuccessPercentage: int</text>
+<text xml:space="preserve" text-anchor="start" x="13.61" y="-1012.4" font-family="Arial" font-size="13.00">&#45;qualityApprovedPercentage: int</text>
+<text xml:space="preserve" text-anchor="start" x="13.61" y="-982.8" font-family="Arial" font-size="13.00">&#45;assignmentDelayMillis: long</text>
+<text xml:space="preserve" text-anchor="start" x="13.61" y="-953.2" font-family="Arial" font-size="13.00">&#45;validationDelayMillis: long</text>
+<text xml:space="preserve" text-anchor="start" x="13.61" y="-923.6" font-family="Arial" font-size="13.00">&#45;printingDelayMillis: long</text>
+<text xml:space="preserve" text-anchor="start" x="13.61" y="-894" font-family="Arial" font-size="13.00">&#45;qualityControlDelayMillis: long</text>
+<text xml:space="preserve" text-anchor="start" x="13.61" y="-864.4" font-family="Arial" font-size="13.00">&#45;randomSeed: long</text>
+<text xml:space="preserve" text-anchor="start" x="13.61" y="-834.8" font-family="Arial" font-size="13.00">&#45;outputDirectory: Path</text>
+<text xml:space="preserve" text-anchor="start" x="13.61" y="-805.2" font-family="Arial" font-size="13.00">+totalPrinters(): int</text>
+<polygon fill="#66758a" stroke="#66758a" points="5.61,-1298.8 5.61,-1298.8 206.62,-1298.8 206.62,-1298.8 5.61,-1298.8"/>
+<polygon fill="#66758a" stroke="#66758a" points="5.61,-825.2 5.61,-825.2 206.62,-825.2 206.62,-825.2 5.61,-825.2"/>
+<polygon fill="none" stroke="#66758a" points="5.61,-794.6 5.61,-1337.8 206.62,-1337.8 206.62,-794.6 5.61,-794.6"/>
+</g>
+<!-- ConfigurationLoader&#45;&gt;SimulationConfig -->
+<g id="edge5" class="edge">
+<title>ConfigurationLoader&#45;&gt;SimulationConfig</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M128.95,-1417.15C127.68,-1397.67 126.11,-1373.56 124.39,-1347.18"/>
+<polygon fill="#52647a" stroke="#52647a" points="123.85,-1338.97 128.22,-1347.2 124.05,-1341.99 124.41,-1347.45 124.41,-1347.45 124.41,-1347.45 124.05,-1341.99 120.59,-1347.7 123.85,-1338.97"/>
+<text xml:space="preserve" text-anchor="middle" x="137.2" y="-1374.1" font-family="Arial" font-size="11.00" fill="#34445b">crea</text>
+</g>
+<!-- Simulation -->
+<g id="node4" class="node">
+<title>Simulation</title>
+<polygon fill="#e8f0f8" stroke="none" points="339.75,-1640.8 339.75,-1678.8 660.48,-1678.8 660.48,-1640.8 339.75,-1640.8"/>
+<text xml:space="preserve" text-anchor="start" x="459.46" y="-1662.9" font-family="Arial" font-size="11.00">«interface» · api</text>
+<text xml:space="preserve" text-anchor="start" x="466.89" y="-1650.1" font-family="Arial" font-weight="bold" font-size="13.00">Simulation</text>
+<text xml:space="preserve" text-anchor="start" x="346.75" y="-1620.8" font-family="Arial" font-size="13.00">+execute(config: SimulationConfig): SimulationResult</text>
+<polygon fill="#66758a" stroke="#66758a" points="338.75,-1640.8 338.75,-1640.8 661.48,-1640.8 661.48,-1640.8 338.75,-1640.8"/>
+<polygon fill="none" stroke="#66758a" points="338.75,-1610.2 338.75,-1679.8 661.48,-1679.8 661.48,-1610.2 338.75,-1610.2"/>
+</g>
+<!-- ConcurrentSimulation&#45;&gt;Simulation -->
+<g id="edge7" class="edge">
+<title>ConcurrentSimulation&#45;&gt;Simulation</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M500.12,-1516.07C500.12,-1542.52 500.12,-1574.99 500.12,-1600.6"/>
+<polygon fill="none" stroke="#52647a" points="497.14,-1600.39 500.12,-1608.89 503.09,-1600.39 497.14,-1600.39"/>
+</g>
+<!-- Thread -->
+<g id="node6" class="node">
+<title>Thread</title>
+<polygon fill="#eeeeee" stroke="none" points="910.57,-1121.2 910.57,-1159.2 1149.66,-1159.2 1149.66,-1121.2 910.57,-1121.2"/>
+<text xml:space="preserve" text-anchor="start" x="993.74" y="-1143.3" font-family="Arial" font-size="11.00">«class» · Java</text>
+<text xml:space="preserve" text-anchor="start" x="1008.44" y="-1130.5" font-family="Arial" font-weight="bold" font-size="13.00">Thread</text>
+<text xml:space="preserve" text-anchor="start" x="917.57" y="-1101.2" font-family="Arial" font-size="13.00">+Thread(task: Runnable, name: String)</text>
+<text xml:space="preserve" text-anchor="start" x="917.57" y="-1071.6" font-family="Arial" font-size="13.00">+start(): void</text>
+<text xml:space="preserve" text-anchor="start" x="917.57" y="-1042" font-family="Arial" font-size="13.00">+join(): void</text>
+<text xml:space="preserve" text-anchor="start" x="917.57" y="-1012.4" font-family="Arial" font-size="13.00">+interrupt(): void</text>
+<text xml:space="preserve" text-anchor="start" x="917.57" y="-982.8" font-family="Arial" font-size="13.00">+isAlive(): boolean</text>
+<polygon fill="#66758a" stroke="#66758a" points="909.57,-1121.2 909.57,-1121.2 1150.66,-1121.2 1150.66,-1121.2 909.57,-1121.2"/>
+<polygon fill="none" stroke="#66758a" points="909.57,-972.2 909.57,-1160.2 1150.66,-1160.2 1150.66,-972.2 909.57,-972.2"/>
+</g>
+<!-- ConcurrentSimulation&#45;&gt;Thread -->
+<g id="edge9" class="edge">
+<title>ConcurrentSimulation&#45;&gt;Thread</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M646.49,-1417.01C755.35,-1380.88 885.12,-1337.8 885.12,-1337.8 885.12,-1337.8 934.76,-1245.15 975.95,-1168.28"/>
+<polygon fill="#52647a" stroke="#52647a" points="979.84,-1161.02 979.2,-1170.32 978.41,-1163.69 975.83,-1168.51 975.83,-1168.51 975.83,-1168.51 978.41,-1163.69 972.46,-1166.71 979.84,-1161.02"/>
+<text xml:space="preserve" text-anchor="middle" x="820.99" y="-1374.1" font-family="Arial" font-size="11.00" fill="#34445b">crea / start / join</text>
+</g>
+<!-- EventLogger -->
+<g id="node7" class="node">
+<title>EventLogger</title>
+<polygon fill="#f6f0e4" stroke="none" points="207.74,-676.4 207.74,-714.4 550.49,-714.4 550.49,-676.4 207.74,-676.4"/>
+<text xml:space="preserve" text-anchor="start" x="335.4" y="-698.5" font-family="Arial" font-size="11.00">«class» · solution</text>
+<text xml:space="preserve" text-anchor="start" x="339.39" y="-685.7" font-family="Arial" font-weight="bold" font-size="13.00">EventLogger</text>
+<text xml:space="preserve" text-anchor="start" x="214.74" y="-656.4" font-family="Arial" font-size="13.00">&#45;writer: BufferedWriter {readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="214.74" y="-626.8" font-family="Arial" font-size="13.00">&#45;nextSequence: long = 1</text>
+<text xml:space="preserve" text-anchor="start" x="214.74" y="-597.2" font-family="Arial" font-size="13.00">&#45;startNanos: long {readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="214.74" y="-567.6" font-family="Arial" font-size="13.00">+EventLogger(outputDirectory: Path, startNanos: long)</text>
+<text xml:space="preserve" text-anchor="start" x="214.74" y="-538" font-family="Arial" font-size="13.00">+logCreation(order: Order): void</text>
+<text xml:space="preserve" text-anchor="start" x="214.74" y="-508.4" font-family="Arial" font-size="13.00">+logTransition(order: Order, stage: Stage,</text>
+<text xml:space="preserve" text-anchor="start" x="214.74" y="-478.8" font-family="Arial" font-size="13.00"> &#160;&#160;&#160;fromState: OrderState, toState: OrderState): void</text>
+<text xml:space="preserve" text-anchor="start" x="214.74" y="-449.2" font-family="Arial" font-size="13.00">&#45;writeRow(order: Order, stage: Stage, event: EventType,</text>
+<text xml:space="preserve" text-anchor="start" x="214.74" y="-419.6" font-family="Arial" font-size="13.00"> &#160;&#160;&#160;fromState: OrderState [0..1], toState: OrderState): void</text>
+<text xml:space="preserve" text-anchor="start" x="214.74" y="-390" font-family="Arial" font-size="13.00">+close(): void</text>
+<polygon fill="#66758a" stroke="#66758a" points="206.74,-676.4 206.74,-676.4 551.49,-676.4 551.49,-676.4 206.74,-676.4"/>
+<polygon fill="#66758a" stroke="#66758a" points="206.74,-587.6 206.74,-587.6 551.49,-587.6 551.49,-587.6 206.74,-587.6"/>
+<polygon fill="none" stroke="#66758a" points="206.74,-379.4 206.74,-715.4 551.49,-715.4 551.49,-379.4 206.74,-379.4"/>
+</g>
+<!-- ConcurrentSimulation&#45;&gt;EventLogger -->
+<g id="edge10" class="edge">
+<title>ConcurrentSimulation&#45;&gt;EventLogger</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M436.79,-1417.28C389.35,-1381.09 332.6,-1337.8 332.6,-1337.8 332.6,-1337.8 332.6,-794.6 332.6,-794.6 332.6,-794.6 338.37,-764.05 345.85,-724.47"/>
+<polygon fill="#52647a" stroke="#52647a" points="347.35,-716.54 349.53,-725.61 346.78,-719.52 345.77,-724.9 345.77,-724.9 345.77,-724.9 346.78,-719.52 342.01,-724.18 347.35,-716.54"/>
+<text xml:space="preserve" text-anchor="middle" x="362.86" y="-1062.9" font-family="Arial" font-size="11.00" fill="#34445b">crea y cierra</text>
+</g>
+<!-- ResultWriter -->
+<g id="node8" class="node">
+<title>ResultWriter</title>
+<polygon fill="#f6f0e4" stroke="none" points="633.45,-1091.6 633.45,-1129.6 858.78,-1129.6 858.78,-1091.6 633.45,-1091.6"/>
+<text xml:space="preserve" text-anchor="start" x="702.4" y="-1113.7" font-family="Arial" font-size="11.00">«class» · solution</text>
+<text xml:space="preserve" text-anchor="start" x="707.47" y="-1100.9" font-family="Arial" font-weight="bold" font-size="13.00">ResultWriter</text>
+<text xml:space="preserve" text-anchor="start" x="640.45" y="-1071.6" font-family="Arial" font-size="13.00">&#45;outputDirectory: Path {readOnly}</text>
+<text xml:space="preserve" text-anchor="start" x="640.45" y="-1042" font-family="Arial" font-size="13.00">+ResultWriter(outputDirectory: Path)</text>
+<text xml:space="preserve" text-anchor="start" x="640.45" y="-1012.4" font-family="Arial" font-size="13.00">+write(result: SimulationResult): void</text>
+<polygon fill="#66758a" stroke="#66758a" points="632.45,-1091.6 632.45,-1091.6 859.78,-1091.6 859.78,-1091.6 632.45,-1091.6"/>
+<polygon fill="#66758a" stroke="#66758a" points="632.45,-1062 632.45,-1062 859.78,-1062 859.78,-1062 632.45,-1062"/>
+<polygon fill="none" stroke="#66758a" points="632.45,-1001.8 632.45,-1130.6 859.78,-1130.6 859.78,-1001.8 632.45,-1001.8"/>
+</g>
+<!-- ConcurrentSimulation&#45;&gt;ResultWriter -->
+<g id="edge11" class="edge">
+<title>ConcurrentSimulation&#45;&gt;ResultWriter</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M545.2,-1417.19C561.57,-1399.62 576.12,-1384 576.12,-1384 576.12,-1384 607.12,-1337.8 607.12,-1337.8 607.12,-1337.8 668.1,-1219.07 709.28,-1138.9"/>
+<polygon fill="#52647a" stroke="#52647a" points="713.15,-1131.39 712.66,-1140.69 711.76,-1134.08 709.26,-1138.95 709.26,-1138.95 709.26,-1138.95 711.76,-1134.08 705.86,-1137.2 713.15,-1131.39"/>
+<text xml:space="preserve" text-anchor="middle" x="609.8" y="-1374.1" font-family="Arial" font-size="11.00" fill="#34445b">crea y usa</text>
+</g>
+<!-- SimulationMonitor -->
+<g id="node11" class="node">
+<title>SimulationMonitor</title>
+<polygon fill="#f6f0e4" stroke="none" points="418.83,-1047.2 418.83,-1085.2 581.4,-1085.2 581.4,-1047.2 418.83,-1047.2"/>
+<text xml:space="preserve" text-anchor="start" x="425.83" y="-1069.3" font-family="Arial" font-size="11.00">«class» · solution · referencia</text>
+<text xml:space="preserve" text-anchor="start" x="443.07" y="-1056.5" font-family="Arial" font-weight="bold" font-size="13.00">SimulationMonitor</text>
+<polygon fill="none" stroke="#66758a" points="417.83,-1046.2 417.83,-1086.2 582.4,-1086.2 582.4,-1046.2 417.83,-1046.2"/>
+</g>
+<!-- ConcurrentSimulation&#45;&gt;SimulationMonitor -->
+<g id="edge8" class="edge">
+<title>ConcurrentSimulation&#45;&gt;SimulationMonitor</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M500.12,-1417.15C500.12,-1333.12 500.12,-1162.91 500.12,-1095.56"/>
+<polygon fill="#52647a" stroke="#52647a" points="500.12,-1087.24 503.94,-1095.74 500.12,-1090.28 500.12,-1095.74 500.12,-1095.74 500.12,-1095.74 500.12,-1090.28 496.29,-1095.74 500.12,-1087.24"/>
+<text xml:space="preserve" text-anchor="middle" x="532.22" y="-1374.1" font-family="Arial" font-size="11.00" fill="#34445b">crea / espera</text>
+</g>
+<!-- Stage -->
+<g id="node9" class="node">
+<title>Stage</title>
+<polygon fill="#f6f0e4" stroke="none" points="202.91,-261.2 202.91,-299.2 343.32,-299.2 343.32,-261.2 202.91,-261.2"/>
+<text xml:space="preserve" text-anchor="start" x="211.36" y="-283.3" font-family="Arial" font-size="11.00">«enumeration» · solution</text>
+<text xml:space="preserve" text-anchor="start" x="255.42" y="-270.5" font-family="Arial" font-weight="bold" font-size="13.00">Stage</text>
+<text xml:space="preserve" text-anchor="start" x="209.91" y="-241.2" font-family="Arial" font-size="13.00">INITIALIZATION</text>
+<text xml:space="preserve" text-anchor="start" x="209.91" y="-211.6" font-family="Arial" font-size="13.00">ASSIGNMENT</text>
+<text xml:space="preserve" text-anchor="start" x="209.91" y="-182" font-family="Arial" font-size="13.00">VALIDATION</text>
+<text xml:space="preserve" text-anchor="start" x="209.91" y="-152.4" font-family="Arial" font-size="13.00">PRINTING</text>
+<text xml:space="preserve" text-anchor="start" x="209.91" y="-122.8" font-family="Arial" font-size="13.00">QUALITY_CONTROL</text>
+<polygon fill="#66758a" stroke="#66758a" points="201.91,-261.2 201.91,-261.2 344.32,-261.2 344.32,-261.2 201.91,-261.2"/>
+<polygon fill="none" stroke="#66758a" points="201.91,-112.2 201.91,-300.2 344.32,-300.2 344.32,-112.2 201.91,-112.2"/>
+</g>
+<!-- EventLogger&#45;&gt;Stage -->
+<g id="edge2" class="edge">
+<title>EventLogger&#45;&gt;Stage</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M327.05,-379.78C319.5,-355.63 311.93,-331.4 304.94,-309.05"/>
+<polygon fill="#52647a" stroke="#52647a" points="302.46,-301.09 308.64,-308.06 303.36,-303.98 304.99,-309.2 304.99,-309.2 304.99,-309.2 303.36,-303.98 301.34,-310.34 302.46,-301.09"/>
+<text xml:space="preserve" text-anchor="middle" x="326.96" y="-336.5" font-family="Arial" font-size="11.00" fill="#34445b">stage</text>
+</g>
+<!-- EventType -->
+<g id="node10" class="node">
+<title>EventType</title>
+<polygon fill="#f6f0e4" stroke="none" points="394.96,-216.8 394.96,-254.8 577.27,-254.8 577.27,-216.8 394.96,-216.8"/>
+<text xml:space="preserve" text-anchor="start" x="424.36" y="-238.9" font-family="Arial" font-size="11.00">«enumeration» · solution</text>
+<text xml:space="preserve" text-anchor="start" x="453.24" y="-226.1" font-family="Arial" font-weight="bold" font-size="13.00">EventType</text>
+<text xml:space="preserve" text-anchor="start" x="401.96" y="-196.8" font-family="Arial" font-size="13.00">ORDER_CREATED</text>
+<text xml:space="preserve" text-anchor="start" x="401.96" y="-167.2" font-family="Arial" font-size="13.00">ORDER_STATE_CHANGED</text>
+<polygon fill="#66758a" stroke="#66758a" points="393.96,-216.8 393.96,-216.8 578.27,-216.8 578.27,-216.8 393.96,-216.8"/>
+<polygon fill="none" stroke="#66758a" points="393.96,-156.6 393.96,-255.8 578.27,-255.8 578.27,-156.6 393.96,-156.6"/>
+</g>
+<!-- EventLogger&#45;&gt;EventType -->
+<g id="edge3" class="edge">
+<title>EventLogger&#45;&gt;EventType</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M431.68,-379.78C444.71,-338.46 457.82,-296.9 467.91,-264.92"/>
+<polygon fill="#52647a" stroke="#52647a" points="470.44,-256.9 471.53,-266.15 469.53,-259.79 467.88,-265 467.88,-265 467.88,-265 469.53,-259.79 464.23,-263.85 470.44,-256.9"/>
+<text xml:space="preserve" text-anchor="middle" x="458.8" y="-336.5" font-family="Arial" font-size="11.00" fill="#34445b">event</text>
+</g>
+<!-- SimulationResult -->
+<g id="node12" class="node">
+<title>SimulationResult</title>
+<polygon fill="#e8f0f8" stroke="none" points="673.39,-528.4 673.39,-566.4 818.84,-566.4 818.84,-528.4 673.39,-528.4"/>
+<text xml:space="preserve" text-anchor="start" x="680.39" y="-550.5" font-family="Arial" font-size="11.00">«record» · api · referencia</text>
+<text xml:space="preserve" text-anchor="start" x="693.03" y="-537.7" font-family="Arial" font-weight="bold" font-size="13.00">SimulationResult</text>
+<polygon fill="none" stroke="#66758a" points="672.39,-527.4 672.39,-567.4 819.84,-567.4 819.84,-527.4 672.39,-527.4"/>
+</g>
+<!-- ResultWriter&#45;&gt;SimulationResult -->
+<g id="edge12" class="edge">
+<title>ResultWriter&#45;&gt;SimulationResult</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M746.12,-1001.83C746.12,-888.88 746.12,-657.05 746.12,-576.62"/>
+<polygon fill="#52647a" stroke="#52647a" points="746.12,-568.37 749.94,-576.87 746.12,-571.41 746.12,-576.87 746.12,-576.87 746.12,-576.87 746.12,-571.41 742.29,-576.87 746.12,-568.37"/>
+<text xml:space="preserve" text-anchor="middle" x="833.24" y="-751.7" font-family="Arial" font-size="11.00" fill="#34445b">elementos.csv / resumen.properties</text>
+</g>
+<!-- SimulationMonitor&#45;&gt;EventLogger -->
+<g id="edge1" class="edge">
+<title>SimulationMonitor&#45;&gt;EventLogger</title>
+<path fill="none" stroke="#52647a" d="M495.74,-1046.5C483.66,-994.91 448.88,-846.36 420.42,-724.81"/>
+<polygon fill="#52647a" stroke="#52647a" points="418.49,-716.55 424.15,-723.95 419.18,-719.5 420.42,-724.83 420.42,-724.83 420.42,-724.83 419.18,-719.5 416.7,-725.7 418.49,-716.55"/>
+<text xml:space="preserve" text-anchor="middle" x="459.36" y="-751.7" font-family="Arial" font-size="11.00" fill="#34445b">eventLogger</text>
+<text xml:space="preserve" text-anchor="middle" x="431.81" y="-729.36" font-family="Arial" font-size="11.00" fill="#34445b">1</text>
+<text xml:space="preserve" text-anchor="middle" x="482.14" y="-1025.91" font-family="Arial" font-size="11.00" fill="#34445b">1</text>
+</g>
+<!-- note -->
+<g id="node13" class="node">
+<title>note</title>
+<polygon fill="none" stroke="black" points="496.7,-79.2 43.53,-79.2 43.53,0 502.7,0 502.7,-73.2 496.7,-79.2"/>
+<polyline fill="none" stroke="black" points="496.7,-79.2 496.7,-73.2"/>
+<polyline fill="none" stroke="black" points="502.7,-73.2 496.7,-73.2"/>
+<text xml:space="preserve" text-anchor="middle" x="273.12" y="-57.6" font-family="Arial" font-size="12.00">execute usa solamente config; crea recursos locales por llamada.</text>
+<text xml:space="preserve" text-anchor="middle" x="273.12" y="-43.2" font-family="Arial" font-size="12.00">Inicia todas las etapas, awaitCompletion, join de todos los hilos, cierre y resultado.</text>
+<text xml:space="preserve" text-anchor="middle" x="273.12" y="-28.8" font-family="Arial" font-size="12.00">Stage y EventType son enums propios; los textos los exige la consigna.</text>
+<text xml:space="preserve" text-anchor="middle" x="273.12" y="-14.4" font-family="Arial" font-size="12.00">Excepciones y contratos completos: guia&#45;diagrama&#45;clases.md.</text>
+</g>
+</g>
+</svg>
+<svg x="2520" y="3836" width="2400" height="3109" viewBox="0.00 0.00 792.00 1026.00">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(25.2 1000.6)">
+<title>G</title>
+<polygon fill="white" stroke="none" points="-25.2,25.2 -25.2,-1000.6 766.72,-1000.6 766.72,25.2 -25.2,25.2"/>
+<text xml:space="preserve" text-anchor="middle" x="370.76" y="-949.8" font-family="Arial" font-size="24.00">4. Capturas y resultado final</text>
+<!-- OrderSnapshot -->
+<g id="node1" class="node">
+<title>OrderSnapshot</title>
+<polygon fill="#e8f0f8" stroke="none" points="412.9,-454 412.9,-492 573.58,-492 573.58,-454 412.9,-454"/>
+<text xml:space="preserve" text-anchor="start" x="458.09" y="-476.1" font-family="Arial" font-size="11.00">«record» · api</text>
+<text xml:space="preserve" text-anchor="start" x="445.93" y="-463.3" font-family="Arial" font-weight="bold" font-size="13.00">OrderSnapshot</text>
+<text xml:space="preserve" text-anchor="start" x="419.9" y="-434" font-family="Arial" font-size="13.00">&#45;id: int</text>
+<text xml:space="preserve" text-anchor="start" x="419.9" y="-404.4" font-family="Arial" font-size="13.00">&#45;state: OrderState</text>
+<text xml:space="preserve" text-anchor="start" x="419.9" y="-374.8" font-family="Arial" font-size="13.00">&#45;assignedPrinterId: String</text>
+<text xml:space="preserve" text-anchor="start" x="419.9" y="-345.2" font-family="Arial" font-size="13.00">&#45;assignmentCount: int</text>
+<text xml:space="preserve" text-anchor="start" x="419.9" y="-315.6" font-family="Arial" font-size="13.00">&#45;validationCount: int</text>
+<text xml:space="preserve" text-anchor="start" x="419.9" y="-286" font-family="Arial" font-size="13.00">&#45;printingCount: int</text>
+<text xml:space="preserve" text-anchor="start" x="419.9" y="-256.4" font-family="Arial" font-size="13.00">&#45;qualityControlCount: int</text>
+<polygon fill="#66758a" stroke="#66758a" points="411.9,-454 411.9,-454 574.58,-454 574.58,-454 411.9,-454"/>
+<polygon fill="none" stroke="#66758a" points="411.9,-245.8 411.9,-493 574.58,-493 574.58,-245.8 411.9,-245.8"/>
+</g>
+<!-- OrderState -->
+<g id="node6" class="node">
+<title>OrderState</title>
+<polygon fill="#e8f0f8" stroke="none" points="405.53,-127.6 405.53,-165.6 580.95,-165.6 580.95,-127.6 405.53,-127.6"/>
+<text xml:space="preserve" text-anchor="start" x="412.53" y="-149.7" font-family="Arial" font-size="11.00">«enumeration» · api · referencia</text>
+<text xml:space="preserve" text-anchor="start" x="459.65" y="-136.9" font-family="Arial" font-weight="bold" font-size="13.00">OrderState</text>
+<polygon fill="none" stroke="#66758a" points="404.53,-126.6 404.53,-166.6 581.95,-166.6 581.95,-126.6 404.53,-126.6"/>
+</g>
+<!-- OrderSnapshot&#45;&gt;OrderState -->
+<g id="edge6" class="edge">
+<title>OrderSnapshot&#45;&gt;OrderState</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M493.24,-246.05C493.24,-219.69 493.24,-194.25 493.24,-175.84"/>
+<polygon fill="#52647a" stroke="#52647a" points="493.24,-167.58 497.07,-176.08 493.24,-170.62 493.24,-176.08 493.24,-176.08 493.24,-176.08 493.24,-170.62 489.42,-176.08 493.24,-167.58"/>
+<text xml:space="preserve" text-anchor="middle" x="505.16" y="-202.9" font-family="Arial" font-size="11.00" fill="#34445b">state</text>
+</g>
+<!-- PrinterSnapshot -->
+<g id="node2" class="node">
+<title>PrinterSnapshot</title>
+<polygon fill="#e8f0f8" stroke="none" points="148.17,-409.6 148.17,-447.6 310.31,-447.6 310.31,-409.6 148.17,-409.6"/>
+<text xml:space="preserve" text-anchor="start" x="194.09" y="-431.7" font-family="Arial" font-size="11.00">«record» · api</text>
+<text xml:space="preserve" text-anchor="start" x="178.68" y="-418.9" font-family="Arial" font-weight="bold" font-size="13.00">PrinterSnapshot</text>
+<text xml:space="preserve" text-anchor="start" x="155.17" y="-389.6" font-family="Arial" font-size="13.00">&#45;id: String</text>
+<text xml:space="preserve" text-anchor="start" x="155.17" y="-360" font-family="Arial" font-size="13.00">&#45;state: PrinterState</text>
+<text xml:space="preserve" text-anchor="start" x="155.17" y="-330.4" font-family="Arial" font-size="13.00">&#45;usageCount: int</text>
+<text xml:space="preserve" text-anchor="start" x="155.17" y="-300.8" font-family="Arial" font-size="13.00">&#45;assignedOrderId: Integer</text>
+<polygon fill="#66758a" stroke="#66758a" points="147.17,-409.6 147.17,-409.6 311.31,-409.6 311.31,-409.6 147.17,-409.6"/>
+<polygon fill="none" stroke="#66758a" points="147.17,-290.2 147.17,-448.6 311.31,-448.6 311.31,-290.2 147.17,-290.2"/>
+</g>
+<!-- PrinterState -->
+<g id="node7" class="node">
+<title>PrinterState</title>
+<polygon fill="#e8f0f8" stroke="none" points="141.53,-127.6 141.53,-165.6 316.95,-165.6 316.95,-127.6 141.53,-127.6"/>
+<text xml:space="preserve" text-anchor="start" x="148.53" y="-149.7" font-family="Arial" font-size="11.00">«enumeration» · api · referencia</text>
+<text xml:space="preserve" text-anchor="start" x="192.4" y="-136.9" font-family="Arial" font-weight="bold" font-size="13.00">PrinterState</text>
+<polygon fill="none" stroke="#66758a" points="140.53,-126.6 140.53,-166.6 317.95,-166.6 317.95,-126.6 140.53,-126.6"/>
+</g>
+<!-- PrinterSnapshot&#45;&gt;PrinterState -->
+<g id="edge7" class="edge">
+<title>PrinterSnapshot&#45;&gt;PrinterState</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M229.24,-290.24C229.24,-250.52 229.24,-204.68 229.24,-175.92"/>
+<polygon fill="#52647a" stroke="#52647a" points="229.24,-167.72 233.07,-176.22 229.24,-170.75 229.24,-176.22 229.24,-176.22 229.24,-176.22 229.24,-170.75 225.42,-176.22 229.24,-167.72"/>
+<text xml:space="preserve" text-anchor="middle" x="241.16" y="-202.9" font-family="Arial" font-size="11.00" fill="#34445b">state</text>
+</g>
+<!-- SimulationResult -->
+<g id="node3" class="node">
+<title>SimulationResult</title>
+<polygon fill="#e8f0f8" stroke="none" points="272.29,-780.4 272.29,-818.4 526.19,-818.4 526.19,-780.4 272.29,-780.4"/>
+<text xml:space="preserve" text-anchor="start" x="364.09" y="-802.5" font-family="Arial" font-size="11.00">«record» · api</text>
+<text xml:space="preserve" text-anchor="start" x="346.15" y="-789.7" font-family="Arial" font-weight="bold" font-size="13.00">SimulationResult</text>
+<text xml:space="preserve" text-anchor="start" x="279.29" y="-760.4" font-family="Arial" font-size="13.00">&#45;totalOrders: int</text>
+<text xml:space="preserve" text-anchor="start" x="279.29" y="-730.8" font-family="Arial" font-size="13.00">&#45;processedOrders: int</text>
+<text xml:space="preserve" text-anchor="start" x="279.29" y="-701.2" font-family="Arial" font-size="13.00">&#45;totalsByState: Map&lt;OrderState, Integer&gt;</text>
+<text xml:space="preserve" text-anchor="start" x="279.29" y="-671.6" font-family="Arial" font-size="13.00">&#45;orders: List&lt;OrderSnapshot&gt;</text>
+<text xml:space="preserve" text-anchor="start" x="279.29" y="-642" font-family="Arial" font-size="13.00">&#45;printers: List&lt;PrinterSnapshot&gt;</text>
+<text xml:space="preserve" text-anchor="start" x="279.29" y="-612.4" font-family="Arial" font-size="13.00">&#45;durationMillis: long</text>
+<text xml:space="preserve" text-anchor="start" x="279.29" y="-582.8" font-family="Arial" font-size="13.00">&#45;allThreadsTerminated: boolean</text>
+<polygon fill="#66758a" stroke="#66758a" points="271.29,-780.4 271.29,-780.4 527.19,-780.4 527.19,-780.4 271.29,-780.4"/>
+<polygon fill="none" stroke="#66758a" points="271.29,-572.2 271.29,-819.4 527.19,-819.4 527.19,-572.2 271.29,-572.2"/>
+</g>
+<!-- SimulationResult&#45;&gt;OrderSnapshot -->
+<g id="edge4" class="edge">
+<title>SimulationResult&#45;&gt;OrderSnapshot</title>
+<path fill="none" stroke="#52647a" d="M434.64,-572.62C441.33,-549.55 448.35,-525.33 455.11,-501.98"/>
+<polygon fill="#52647a" stroke="#52647a" points="457.45,-493.91 458.76,-503.14 456.61,-496.82 455.09,-502.07 455.09,-502.07 455.09,-502.07 456.61,-496.82 451.41,-501.01 457.45,-493.91"/>
+<text xml:space="preserve" text-anchor="middle" x="461.83" y="-529.3" font-family="Arial" font-size="11.00" fill="#34445b">orders</text>
+<text xml:space="preserve" text-anchor="middle" x="461.17" y="-511.18" font-family="Arial" font-size="11.00" fill="#34445b">0..*</text>
+<text xml:space="preserve" text-anchor="middle" x="431.26" y="-547.58" font-family="Arial" font-size="11.00" fill="#34445b">0..*</text>
+</g>
+<!-- SimulationResult&#45;&gt;PrinterSnapshot -->
+<g id="edge5" class="edge">
+<title>SimulationResult&#45;&gt;PrinterSnapshot</title>
+<path fill="none" stroke="#52647a" d="M335.21,-572.62C315,-534.04 293.09,-492.25 274.48,-456.72"/>
+<polygon fill="#52647a" stroke="#52647a" points="270.63,-449.38 277.96,-455.13 272.04,-452.07 274.58,-456.91 274.58,-456.91 274.58,-456.91 272.04,-452.07 271.19,-458.69 270.63,-449.38"/>
+<text xml:space="preserve" text-anchor="middle" x="332.58" y="-529.3" font-family="Arial" font-size="11.00" fill="#34445b">printers</text>
+<text xml:space="preserve" text-anchor="middle" x="287.55" y="-458.35" font-family="Arial" font-size="11.00" fill="#34445b">0..*</text>
+<text xml:space="preserve" text-anchor="middle" x="317.72" y="-555.98" font-family="Arial" font-size="11.00" fill="#34445b">0..*</text>
+</g>
+<!-- Order -->
+<g id="node4" class="node">
+<title>Order</title>
+<polygon fill="#f6f0e4" stroke="none" points="577.96,-676.8 577.96,-714.8 740.52,-714.8 740.52,-676.8 577.96,-676.8"/>
+<text xml:space="preserve" text-anchor="start" x="584.96" y="-698.9" font-family="Arial" font-size="11.00">«class» · solution · referencia</text>
+<text xml:space="preserve" text-anchor="start" x="641.54" y="-686.1" font-family="Arial" font-weight="bold" font-size="13.00">Order</text>
+<polygon fill="none" stroke="#66758a" points="576.96,-675.8 576.96,-715.8 741.52,-715.8 741.52,-675.8 576.96,-675.8"/>
+</g>
+<!-- Order&#45;&gt;OrderSnapshot -->
+<g id="edge2" class="edge">
+<title>Order&#45;&gt;OrderSnapshot</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M649.6,-675.96C632.25,-642.05 594.38,-568.05 560.26,-501.37"/>
+<polygon fill="#52647a" stroke="#52647a" points="556.46,-493.95 563.74,-499.77 557.84,-496.65 560.33,-501.51 560.33,-501.51 560.33,-501.51 557.84,-496.65 556.93,-503.26 556.46,-493.95"/>
+<text xml:space="preserve" text-anchor="middle" x="607.73" y="-529.3" font-family="Arial" font-size="11.00" fill="#34445b">toSnapshot()</text>
+</g>
+<!-- Printer -->
+<g id="node5" class="node">
+<title>Printer</title>
+<polygon fill="#f6f0e4" stroke="none" points="57.96,-676.8 57.96,-714.8 220.52,-714.8 220.52,-676.8 57.96,-676.8"/>
+<text xml:space="preserve" text-anchor="start" x="64.96" y="-698.9" font-family="Arial" font-size="11.00">«class» · solution · referencia</text>
+<text xml:space="preserve" text-anchor="start" x="118.29" y="-686.1" font-family="Arial" font-weight="bold" font-size="13.00">Printer</text>
+<polygon fill="none" stroke="#66758a" points="56.96,-675.8 56.96,-715.8 221.52,-715.8 221.52,-675.8 56.96,-675.8"/>
+</g>
+<!-- Printer&#45;&gt;PrinterSnapshot -->
+<g id="edge3" class="edge">
+<title>Printer&#45;&gt;PrinterSnapshot</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M141.24,-676.09C145.93,-632.14 157.26,-526 157.26,-526 157.26,-526 172.68,-492.66 189.25,-456.85"/>
+<polygon fill="#52647a" stroke="#52647a" points="192.74,-449.31 192.64,-458.63 191.47,-452.06 189.17,-457.02 189.17,-457.02 189.17,-457.02 191.47,-452.06 185.7,-455.41 192.74,-449.31"/>
+<text xml:space="preserve" text-anchor="middle" x="188.75" y="-529.3" font-family="Arial" font-size="11.00" fill="#34445b">toSnapshot()</text>
+</g>
+<!-- ConcurrentSimulation -->
+<g id="node8" class="node">
+<title>ConcurrentSimulation</title>
+<polygon fill="#f6f0e4" stroke="none" points="209.96,-899.6 209.96,-937.6 372.52,-937.6 372.52,-899.6 209.96,-899.6"/>
+<text xml:space="preserve" text-anchor="start" x="216.96" y="-921.7" font-family="Arial" font-size="11.00">«class» · solution · referencia</text>
+<text xml:space="preserve" text-anchor="start" x="222.99" y="-908.9" font-family="Arial" font-weight="bold" font-size="13.00">ConcurrentSimulation</text>
+<polygon fill="none" stroke="#66758a" points="208.96,-898.6 208.96,-938.6 373.52,-938.6 373.52,-898.6 208.96,-898.6"/>
+</g>
+<!-- ConcurrentSimulation&#45;&gt;SimulationResult -->
+<g id="edge1" class="edge">
+<title>ConcurrentSimulation&#45;&gt;SimulationResult</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M300.45,-898.77C308.63,-882.05 321.38,-855.98 335.04,-828.06"/>
+<polygon fill="#52647a" stroke="#52647a" points="338.77,-820.44 338.47,-829.75 337.43,-823.16 335.03,-828.07 335.03,-828.07 335.03,-828.07 337.43,-823.16 331.6,-826.39 338.77,-820.44"/>
+<text xml:space="preserve" text-anchor="middle" x="344.05" y="-855.7" font-family="Arial" font-size="11.00" fill="#34445b">construye</text>
+</g>
+<!-- ResultWriter -->
+<g id="node9" class="node">
+<title>ResultWriter</title>
+<polygon fill="#f6f0e4" stroke="none" points="424.96,-899.6 424.96,-937.6 587.52,-937.6 587.52,-899.6 424.96,-899.6"/>
+<text xml:space="preserve" text-anchor="start" x="431.96" y="-921.7" font-family="Arial" font-size="11.00">«class» · solution · referencia</text>
+<text xml:space="preserve" text-anchor="start" x="467.6" y="-908.9" font-family="Arial" font-weight="bold" font-size="13.00">ResultWriter</text>
+<polygon fill="none" stroke="#66758a" points="423.96,-898.6 423.96,-938.6 588.52,-938.6 588.52,-898.6 423.96,-898.6"/>
+</g>
+<!-- ResultWriter&#45;&gt;SimulationResult -->
+<g id="edge8" class="edge">
+<title>ResultWriter&#45;&gt;SimulationResult</title>
+<path fill="none" stroke="#52647a" stroke-dasharray="5,2" d="M497.12,-898.77C489.01,-882.05 476.38,-855.98 462.85,-828.06"/>
+<polygon fill="#52647a" stroke="#52647a" points="459.16,-820.44 466.3,-826.42 460.48,-823.17 462.86,-828.09 462.86,-828.09 462.86,-828.09 460.48,-823.17 459.42,-829.76 459.16,-820.44"/>
+<text xml:space="preserve" text-anchor="middle" x="567.5" y="-855.7" font-family="Arial" font-size="11.00" fill="#34445b">elementos.csv / resumen.properties</text>
+</g>
+<!-- note -->
+<g id="node10" class="node">
+<title>note</title>
+<polygon fill="none" stroke="black" points="452.48,-93.6 0,-93.6 0,0 458.48,0 458.48,-87.6 452.48,-93.6"/>
+<polyline fill="none" stroke="black" points="452.48,-93.6 452.48,-87.6"/>
+<polyline fill="none" stroke="black" points="458.48,-87.6 452.48,-87.6"/>
+<text xml:space="preserve" text-anchor="middle" x="229.24" y="-72" font-family="Arial" font-size="12.00">Todos los componentes de record son readOnly; accesores automáticos omitidos.</text>
+<text xml:space="preserve" text-anchor="middle" x="229.24" y="-57.6" font-family="Arial" font-size="12.00">Éxito: orders.size = totalOrders; printers.size = config.totalPrinters().</text>
+<text xml:space="preserve" text-anchor="middle" x="229.24" y="-43.2" font-family="Arial" font-size="12.00">OrderSnapshot conserva la impresora histórica.</text>
+<text xml:space="preserve" text-anchor="middle" x="229.24" y="-28.8" font-family="Arial" font-size="12.00">PrinterSnapshot.assignedOrderId es null cuando no existe reserva.</text>
+<text xml:space="preserve" text-anchor="middle" x="229.24" y="-14.4" font-family="Arial" font-size="12.00">Las multiplicidades generales de la API no imponen propiedad exclusiva.</text>
+</g>
+</g>
+</svg>
+</svg>
