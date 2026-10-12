@@ -1,0 +1,32 @@
+{
+  "grupo": "thread-ators",
+  "repositorio": "https://github.com/santi-macagno/tp1-pcyp-2026",
+  "integrantes": [
+    {
+      "nombre": "Santiago Martin Macagno",
+      "documento": "43452083",
+      "usuarioGit": "santi-macagno"
+    },
+    {
+      "nombre": "Pedro Caldera",
+      "documento": "46377648",
+      "usuarioGit": "pedrocaldera"
+    },
+    {
+      "nombre": "Luciano Gabriel Bogni",
+      "documento": "45406937",
+      "usuarioGit": "lucianobogni-arch"
+    },
+    {
+      "nombre": "Ignacio Hernán Garay",
+      "documento": "44191925",
+      "usuarioGit": "agregar"
+    },
+    {
+      "nombre": "Lucio Alejandro Espinoza",
+      "documento": "45773754",
+      "usuarioGit": "agregar"
+    }
+  ]
+}
+
