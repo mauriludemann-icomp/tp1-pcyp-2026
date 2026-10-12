@@ -12,7 +12,7 @@ class Printer {
     - id: String
     - pos: int[]
     - state: PrinterState
-    - assignedOrderId: integer
+    - assignedOrderId: Integer
     - count: int
     + Printer(id: String, row: int, col: int)
     + assignOrder(orderId: int): void
