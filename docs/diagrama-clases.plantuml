@@ -53,6 +53,10 @@ abstract class Worker {
 
 class PrinterAssignmentWorker {
     - printerManager: PrinterManager
+    - config: SimulationConfig
+
+    + PrinterAssignmentWorker(WorkQueue inputQueue, WorkQueue outputQueue, EventLogger eventLogger, SimulationConfig config, PrinterManager printerManager)
+    # processOrder(Order order): void
 }
 
 class ValidationWorker {
@@ -60,6 +64,14 @@ class ValidationWorker {
     - printerManager: PrinterManager
 
     + ValidationWorker(WorkQueue inputQueue, WorkQueue outputQueue, EventLogger eventLogger, SimulationConfig config, PrinterManager printerManager)
+    # processOrder(Order order): void
+}
+
+class PrintingWorker {
+    - config: SimulationConfig
+    - printerManager: PrinterManager
+
+    + PrintingWorker(WorkQueue inputQueue, WorkQueue outputQueue, EventLogger eventLogger, SimulationConfig config, PrinterManager printerManager)
     # processOrder(Order order): void
 }
 
@@ -251,18 +263,22 @@ Worker "*" --> "1..2" WorkQueue : consume / produce
 Worker "*" --> "1" EventLogger : registra eventos en
 Worker <|-- PrinterAssignmentWorker
 Worker <|-- ValidationWorker
+Worker <|-- PrintingWorker
 Worker <|-- QualityWorker
 Printer "1" --> "1" PrinterState : tiene estado
 PrinterFactory "1" ..> "1..*" Printer : <<creates>>
 PrinterFactory ..> PrinterManager : <<creates>>
 PrinterManager "1" *-- "1..*" Printer : posee / contiene
 PrinterAssignmentWorker "*" --> "1" PrinterManager : solicita / libera
+PrinterAssignmentWorker --> SimulationConfig : consulta configuración
 ValidationWorker "*" --> "1" PrinterManager : libera
 ValidationWorker ..> OutcomeDecider : <<uses>>
 ValidationWorker --> SimulationConfig : consulta configuración
+PrintingWorker "*" --> "1" PrinterManager : libera / marca fuera de servicio
+PrintingWorker ..> OutcomeDecider : <<uses>>
+PrintingWorker --> SimulationConfig : consulta configuración
 QualityWorker ..> OutcomeDecider : <<uses>>
 QualityWorker --> SimulationConfig : consulta configuración
-PrinterAssignmentWorker ..> OutcomeDecider : <<uses>>
 ConfigurationLoader ..> SimulationConfig : crea
 OutcomeDecider ..> SimulationConfig
 Simulation ..> SimulationConfig
