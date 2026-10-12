@@ -3,9 +3,9 @@ package ar.edu.unc.fcefyn.pcp.tp1.solution;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-public class WorkQueue<T> {
+public class WorkQueue {
 
-    private final Queue<T> queue = new ArrayDeque<>();
+    private final Queue<Order> queue = new ArrayDeque<>();
     private final int capacity;
     private boolean closed = false;
 
@@ -14,19 +14,31 @@ public class WorkQueue<T> {
     }
 
     public WorkQueue(int capacity) {
+        if (capacity <= 0) {
+            throw new IllegalArgumentException("La capacidad debe ser mayor a 0.");
+        }
         this.capacity = capacity;
     }
 
-    /** Inserta un elemento en la cola. Si la cola está llena, bloquea hasta que haya espacio. */
-    public synchronized void put(T item) throws InterruptedException {
-        while (queue.size() >= capacity && !closed) {
+    /** Inserta un elemento en la cola. Si la cola está llena, bloquea hasta que haya espacio. Luego despierta
+     * a los hilos en espera.
+     * @param order: La orden a agregar en la cola
+     */
+    public synchronized void push(Order order) throws InterruptedException {
+        // Bloquea mientras la cola esté llena y no cerrada
+        while (queue.size() == capacity && !closed) {
             wait();
         }
-        if (closed) {
-            throw new IllegalStateException("No se pueden agregar elementos. Cola cerrada");
+        if (order == null) {
+            throw new NullPointerException("La orden es null, no se puede agregar la orden");
         }
-        queue.add(item);
-        notifyAll(); // Avisa a los hilos en espera
+        if (closed) {
+            throw new IllegalStateException("La cola esta cerrada. No se puede agregar una orden.");
+        }
+
+        queue.add(order);
+        // Despierta a los hilos consumidores bloqueados en pop()
+        notifyAll();
     }
 
     /**
@@ -34,25 +46,28 @@ public class WorkQueue<T> {
      * cierre.
      * @return El elemento extraído o null si la cola fue cerrada y no quedan elementos.
      */
-    public synchronized T take() throws InterruptedException {
+    public synchronized Order pop() throws InterruptedException {
         while (queue.isEmpty() && !closed) {
             wait();
         }
-        if (queue.isEmpty() && closed) {
-            return null; // Indicador para que el hilo termine suavemente
+
+        // Si despertó, pero la cola sigue vacía, entonces la cola está cerrada. Retorna null para Graceful Shutdown
+        if (queue.isEmpty()) {
+            return null;
         }
-        T item = queue.poll();
-        notifyAll(); // Avisa a los hilos en espera si había límite de capacidad
-        return item;
+
+        Order order = queue.poll();
+        // Despierta a los hilos productores bloqueados en push() por capacidad
+        notifyAll();
+        return order;
     }
 
     /**
-     * Cierra la cola e interrumpe la espera de los hilos bloqueados para permitir
-     * la terminación.
+     * Cierra la cola.
      */
     public synchronized void close() {
         this.closed = true;
-        notifyAll(); // Despierta a todos los hilos dormidos en wait()
+        notifyAll(); // Despierta a hilos atrapados en wait()
     }
 
     public synchronized boolean isEmpty() {
@@ -61,5 +76,8 @@ public class WorkQueue<T> {
 
     public synchronized int size() {
         return queue.size();
+    }
+    public synchronized boolean isClosed() {
+        return closed;
     }
 }
