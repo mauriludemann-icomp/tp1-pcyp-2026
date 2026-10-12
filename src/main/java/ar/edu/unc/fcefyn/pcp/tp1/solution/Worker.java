@@ -6,7 +6,7 @@ public abstract class Worker implements Runnable {
     protected EventLogger eventLogger;
     protected String stageName;
 
-    public Worker(WorkQueue inputQueue,WorkQueue outputQueue ,EventLogger eventLogger, String stageName) {
+    public Worker(WorkQueue inputQueue, WorkQueue outputQueue, EventLogger eventLogger, String stageName) {
         this.inputQueue = inputQueue;
         this.outputQueue = outputQueue;
         this.eventLogger = eventLogger;
