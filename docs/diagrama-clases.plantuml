@@ -1,11 +1,15 @@
 @startuml diagrama-clases
 
 class PrinterManager {
-    - printers: Printer[][] 
-    ' aquireAvailablePrinter debe devolver una impresora disponible y cambiar el estado de la impresora a RESERVED.
-    + synchronized acquireAvailablePrinter(): Printer
-    + synchronized releasePrinter(String printerId): void 
-    + markOutOfService(String printerId): void 
+    - matrix: Printer[][]
+    - printerList: List<Printer>
+    ' reserveAvailablePrinter reserva una impresora disponible para la orden y cambia su estado a RESERVED.
+    + PrinterManager(int rows, int cols)
+    + synchronized reserveAvailablePrinter(int orderId): Printer
+    + synchronized releasePrinter(Printer printer, boolean printFailed): void
+    - findAvailablePrinter(): Printer
+    + synchronized getSnapshots(): List<PrinterSnapshot>
+    + synchronized getPrinterById(String printerId): Printer
 }
 
 class Printer {
@@ -52,11 +56,18 @@ class PrinterAssignmentWorker {
 }
 
 class ValidationWorker {
+    - config: SimulationConfig
     - printerManager: PrinterManager
+
+    + ValidationWorker(WorkQueue inputQueue, WorkQueue outputQueue, EventLogger eventLogger, SimulationConfig config, PrinterManager printerManager)
+    # processOrder(Order order): void
 }
 
 class QualityWorker {
-    - config: SimulationConfig
+     - config: SimulationConfig
+
+    + QualityWorker(WorkQueue inputQueue, EventLogger eventLogger, SimulationConfig config)
+    # processOrder(Order order): void
 }
 
 
@@ -74,15 +85,30 @@ class WorkQueue {
 }
 
 class Order {
-    -state: OrderState
-    -order_id: int
-    -idPrinterAssigned: String
-    +transitionTo(OrderState newState, String printerId): void
-    + getPrinterAssigned(): String
+    - id: int
+    - state: OrderState
+    - assignedPrinterId: String
+    - assignmentCount: int
+    - validationCount: int
+    - printingCount: int
+    - qualityControlCount: int
 
+    + Order(int id)
+    + synchronized getId(): int
+    + synchronized getState(): OrderState
+    + synchronized getAssignedPrinterId(): String
+    + synchronized getAssignmentCount(): int
+    + synchronized getValidationCount(): int
+    + synchronized getPrintingCount(): int
+    + synchronized getQualityControlCount(): int
+
+    + synchronized onAssigned(String printerId): void
+    + synchronized onValidationResult(boolean valid): void
+    + synchronized onPrintResult(boolean success): void
+    + synchronized onQualityResult(boolean approved): void
+
+    + synchronized toSnapshot(): OrderSnapshot
 }
-
-
 
 ' CreateOrders devuelve una lista de ordenes creadas. Desde ConcurrentSimuilation se debe agregar las ordenes a la WorkQueue correspondiente. Al ser factoyry solo se encarga de crearlas nada mas.
 class OrderFactory {
@@ -151,7 +177,7 @@ enum OrderState {
     APPROVED
     REJECTED
     READY_TO_PRINT
-    WAINTING_VALIDATION
+    WAITING_VALIDATION
     PRINT_FAILED
     DEFECTIVE
     PRINTED
@@ -233,7 +259,9 @@ PrinterManager "1" *-- "1..*" Printer : posee / contiene
 PrinterAssignmentWorker "*" --> "1" PrinterManager : solicita / libera
 ValidationWorker "*" --> "1" PrinterManager : libera
 ValidationWorker ..> OutcomeDecider : <<uses>>
+ValidationWorker --> SimulationConfig : consulta configuración
 QualityWorker ..> OutcomeDecider : <<uses>>
+QualityWorker --> SimulationConfig : consulta configuración
 PrinterAssignmentWorker ..> OutcomeDecider : <<uses>>
 ConfigurationLoader ..> SimulationConfig : crea
 OutcomeDecider ..> SimulationConfig
