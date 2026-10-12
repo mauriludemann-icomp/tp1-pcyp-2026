@@ -279,7 +279,7 @@ Se registran únicamente transiciones de órdenes, no cambios de estado internos
 - `stage`: `INITIALIZATION`, `ASSIGNMENT`, `VALIDATION`, `PRINTING` o `QUALITY_CONTROL`.
 - `event`: `ORDER_CREATED` para la creación inicial u `ORDER_STATE_CHANGED` para cualquier otra transición.
 
-Cada orden genera inicialmente una fila `ORDER_CREATED`, con `fromState` y `printer` vacíos, y `toState=CREATED`. En las transiciones posteriores, `fromState` y `toState` contienen estados de `OrderState`; `printer` contiene el identificador histórico de la impresora usada por la orden, o queda vacío si no corresponde. `thread` identifica el hilo que efectuó la transición y `elapsedMs` es no negativo. Las filas deben escribirse en el mismo orden en que las transiciones que describen quedan confirmadas.
+Cada orden genera inicialmente una fila `ORDER_CREATED`, con `fromState` y `Printer` vacíos, y `toState=CREATED`. En las transiciones posteriores, `fromState` y `toState` contienen estados de `OrderState`; `Printer` contiene el identificador histórico de la impresora usada por la orden, o queda vacío si no corresponde. `thread` identifica el hilo que efectuó la transición y `elapsedMs` es no negativo. Las filas deben escribirse en el mismo orden en que las transiciones que describen quedan confirmadas.
 
 Ejemplo:
 
@@ -299,7 +299,7 @@ orderId;finalState;printer;assignmentCount;validationCount;printingCount;quality
 
 Debe contener una fila por orden, ordenada por `orderId`.
 
-La columna `printer` conserva el identificador de la impresora utilizada por la orden como dato histórico, incluso después de liberarla. En cambio, una impresora liberada debe informar `assignedOrderId` vacío en su `PrinterSnapshot`.
+La columna `Printer` conserva el identificador de la impresora utilizada por la orden como dato histórico, incluso después de liberarla. En cambio, una impresora liberada debe informar `assignedOrderId` vacío en su `PrinterSnapshot`.
 
 ### resumen.properties
 
