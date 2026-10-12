@@ -59,7 +59,7 @@ class ValidationWorker {
 }
 
 class QualityWorker {
-    - printerManager: PrinterManager
+    - config: SimulationConfig
 }
 
 
