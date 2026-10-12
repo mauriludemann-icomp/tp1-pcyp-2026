@@ -10,23 +10,20 @@ class PrinterManager {
 
 class Printer {
     - id: String
-    - pos: int[2] 
+    - pos: int[]
     - state: PrinterState
-    - assignedOrderId: int
+    - assignedOrderId: Integer
     - count: int
-    + changeState(): void
-    + incCount(): void
-    + transitionTo(PrinterState newState):void
+    + Printer(id: String, row: int, col: int)
+    + assignOrder(orderId: int): void
+    + release(): void
+    + markOutOfService(): void
+    + toSnapshot(): PrinterSnapshot
     + getId(): String
-    + getPos(): int[2]
+    + getPos(): int[]
     + getState(): PrinterState
-    + getAssignedOrderId(): int
+    + getAssignedOrderId(): Integer
     + getCount(): int
-    + setId(String id): void
-    + setPos(int[2] pos): void
-    + setState(PrinterState state): void
-    + setAssignedOrderId(int assignedOrderId): void        
-    + setCount(int count): void
 }
 
 
