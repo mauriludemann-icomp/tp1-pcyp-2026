@@ -81,12 +81,14 @@ public class PrinterManager {
         return null;
     }
 
-    public boolean allPrintersReleased(){
+    public synchronized boolean allPrintersReleased() {
         for (Printer printer : printerList) {
-            if (printer.getState() == PrinterState.RESERVED || printer.getAssignedOrderId() != null) {
+            if (printer.getState() == PrinterState.RESERVED
+                    || printer.getAssignedOrderId() != null) {
                 return false;
             }
         }
         return true;
     }
+
 }
