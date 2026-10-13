@@ -35,24 +35,26 @@ public class PrinterAssignmentWorker extends Worker {
         boolean entregada = false;
 
         try {
-            synchronized (order) {
-                OrderState estadoAnterior = order.getState();
+            synchronized (eventLogger) {
+                synchronized (order) {
+                    OrderState estadoAnterior = order.getState();
 
-                order.onAssigned(impresora.getId());
+                    order.onAssigned(impresora.getId());
 
-                try {
-                    eventLogger.logEvent(
-                            order.getId(),
-                            EventLogger.Stage.ASSIGNMENT,
-                            EventLogger.EventType.ORDER_STATE_CHANGED,
-                            estadoAnterior,
-                            order.getState(),
-                            order.getAssignedPrinterId()
-                    );
-                } catch (IOException e) {
-                    throw new UncheckedIOException(
-                            "Error al registrar la asignación", e
-                    );
+                    try {
+                        eventLogger.logEvent(
+                                order.getId(),
+                                EventLogger.Stage.ASSIGNMENT,
+                                EventLogger.EventType.ORDER_STATE_CHANGED,
+                                estadoAnterior,
+                                order.getState(),
+                                order.getAssignedPrinterId()
+                        );
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(
+                                "Error al registrar la asignación", e
+                        );
+                    }
                 }
             }
 
@@ -66,4 +68,3 @@ public class PrinterAssignmentWorker extends Worker {
         }
     }
 }
-

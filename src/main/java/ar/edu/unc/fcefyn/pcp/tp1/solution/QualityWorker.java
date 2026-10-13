@@ -30,21 +30,23 @@ public class QualityWorker extends Worker {
         boolean isApproved = OutcomeDecider.isQualityApproved(order.getId(), config);
 
         // Modifico estado
-        synchronized (order) {
-            OrderState fromState = order.getState(); // Debería ser PRINTED
-            order.onQualityResult(isApproved);      // Pasa a APPROVED o DEFECTIVE
+        synchronized (eventLogger) {
+            synchronized (order) {
+                OrderState fromState = order.getState(); // Debería ser PRINTED
+                order.onQualityResult(isApproved);      // Pasa a APPROVED o DEFECTIVE
 
-            try {
-                eventLogger.logEvent(
-                        order.getId(),
-                        EventLogger.Stage.QUALITY_CONTROL,
-                        EventLogger.EventType.ORDER_STATE_CHANGED,
-                        fromState,
-                        order.getState(),
-                        order.getAssignedPrinterId() // Guarda la impresora histórica
-                );
-            } catch (IOException e) {
-                throw new UncheckedIOException("Error checking order quality " + order.getId(), e);
+                try {
+                    eventLogger.logEvent(
+                            order.getId(),
+                            EventLogger.Stage.QUALITY_CONTROL,
+                            EventLogger.EventType.ORDER_STATE_CHANGED,
+                            fromState,
+                            order.getState(),
+                            order.getAssignedPrinterId() // Guarda la impresora histórica
+                    );
+                } catch (IOException e) {
+                    throw new UncheckedIOException("Error checking order quality " + order.getId(), e);
+                }
             }
         }
 

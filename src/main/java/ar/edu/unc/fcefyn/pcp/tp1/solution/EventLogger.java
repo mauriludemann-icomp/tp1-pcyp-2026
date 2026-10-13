@@ -5,6 +5,7 @@ import ar.edu.unc.fcefyn.pcp.tp1.api.OrderState;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class EventLogger implements AutoCloseable {
@@ -27,6 +28,8 @@ public class EventLogger implements AutoCloseable {
     private long sequence = 0;
 
     public EventLogger(Path outputDirectory) throws IOException {
+        Files.createDirectories(outputDirectory);
+
         Path filePath = outputDirectory.resolve("eventos.csv");
         this.writer = new BufferedWriter(new FileWriter(filePath.toFile()));
         this.startTimeMs = System.currentTimeMillis();
