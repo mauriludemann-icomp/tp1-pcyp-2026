@@ -1,11 +1,26 @@
 {
-  "grupo": "REEMPLAZAR_CON_NOMBRE_DEL_GRUPO",
+  "grupo": "Programacion Con Currente",
   "repositorio": "REEMPLAZAR_CON_URL_DEL_REPOSITORIO",
   "integrantes": [
     {
-      "nombre": "REEMPLAZAR",
-      "documento": "REEMPLAZAR",
-      "usuarioGit": "REEMPLAZAR"
+      "nombre": "Tosolini Franco Alberto",
+      "documento": "45702152",
+      "usuarioGit": "francotosolini-cmyk"
+    },
+    {
+      "nombre": "Chiavazza Labeguerie Fiamma Itziar",
+      "documento": "46851396",
+      "usuarioGit": "FiammaCL"
+    },
+    {
+      "nombre": "Scagliotti Marcos",
+      "documento": "46070301",
+      "usuarioGit": "Marco22S6"
+    },
+    {
+      "nombre": "Arias Valentin",
+      "documento": "45734482",
+      "usuarioGit": "ValentinArias11"
     }
   ]
 }
