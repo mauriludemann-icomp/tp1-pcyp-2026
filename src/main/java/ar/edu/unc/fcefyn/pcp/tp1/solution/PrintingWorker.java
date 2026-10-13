@@ -10,60 +10,65 @@ import ar.edu.unc.fcefyn.pcp.tp1.api.SimulationConfig;
 public class PrintingWorker extends Worker {
     private final SimulationConfig config;
     private final PrinterManager printerManager;
-    
+
     public PrintingWorker(
-        WorkQueue inputQueue,
-        WorkQueue outputQueue,
-        EventLogger eventLogger,
-        SimulationConfig config,
-        PrinterManager printerManager) {
-    super(inputQueue, outputQueue, eventLogger, "PRINTING");
-    this.config = config;
-    this.printerManager = printerManager;
+            WorkQueue inputQueue,
+            WorkQueue outputQueue,
+            EventLogger eventLogger,
+            SimulationConfig config,
+            PrinterManager printerManager) {
+        super(inputQueue, outputQueue, eventLogger, "PRINTING");
+        this.config = config;
+        this.printerManager = printerManager;
     }
-   @Override
+
+    @Override
     protected void processOrder(Order order) throws InterruptedException {
         Printer impresora = printerManager.getPrinterById(order.getAssignedPrinterId());
         if (impresora == null) {
             throw new IllegalStateException(
-                "No se encontró la impresora asignada a la orden " + order.getId()
+                    "No se encontró la impresora asignada a la orden " + order.getId()
             );
         }
+
         boolean impresoraGestionada = false;
+        boolean successful = false;
         try {
             Thread.sleep(config.printingDelayMillis());
-            boolean succes = OutcomeDecider.isPrintSuccessful(order.getId(), config);
-            synchronized (order) {
-                OrderState estadoAnterior = order.getState();
-                order.onPrintResult(succes);
-                try {
-                    eventLogger.logEvent(
-                        order.getId(),
-                        EventLogger.Stage.PRINTING,
-                        EventLogger.EventType.ORDER_STATE_CHANGED,
-                        estadoAnterior,
-                    order.getState(),
-                    order.getAssignedPrinterId()
-                );
-            } catch (IOException e) {
-                throw new UncheckedIOException(
-                    "Error al registrar la impresión", e
-                );
+            successful = OutcomeDecider.isPrintSuccessful(order.getId(), config);
+
+            synchronized (eventLogger) {
+                synchronized (order) {
+                    OrderState estadoAnterior = order.getState();
+                    order.onPrintResult(successful);
+                    try {
+                        eventLogger.logEvent(
+                                order.getId(),
+                                EventLogger.Stage.PRINTING,
+                                EventLogger.EventType.ORDER_STATE_CHANGED,
+                                estadoAnterior,
+                                order.getState(),
+                                order.getAssignedPrinterId()
+                        );
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(
+                                "Error al registrar la impresión", e
+                        );
+                    }
+                }
             }
-        }
 
-        printerManager.releasePrinter(impresora, !succes);
-        impresoraGestionada = true;
+            printerManager.releasePrinter(impresora, !successful);
+            impresoraGestionada = true;
 
-        if (succes) {
-            outputQueue.push(order);
-        }
+            if (successful) {
+                outputQueue.push(order);
+            }
 
-    } finally {
-        if (!impresoraGestionada) {
-            printerManager.releasePrinter(impresora, false);
+        } finally {
+            if (!impresoraGestionada) {
+                printerManager.releasePrinter(impresora, false);
+            }
         }
     }
 }
-}
-
