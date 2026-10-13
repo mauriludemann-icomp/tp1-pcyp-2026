@@ -58,6 +58,18 @@ public final class PipelineCoordinator {
         outputQueue.close();
     }
 
+    public void awaitStage(int stageIndex) throws InterruptedException {
+        List<Thread> stage = stages.get(stageIndex);
+        try {
+            for (Thread worker : stage) {
+                worker.join();
+            }
+        } catch (InterruptedException e) {
+            cancelAndAwaitTermination();
+            throw e;
+        }
+    }
+
     /**
      * Closes all queues, interrupts active workers, and joins every worker. If
      * joining is itself interrupted, it keeps waiting and restores this thread's

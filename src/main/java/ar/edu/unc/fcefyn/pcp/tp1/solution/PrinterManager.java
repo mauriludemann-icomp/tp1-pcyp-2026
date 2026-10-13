@@ -80,4 +80,15 @@ public class PrinterManager {
         }
         return null;
     }
+
+    public synchronized boolean allPrintersReleased() {
+        for (Printer printer : printerList) {
+            if (printer.getState() == PrinterState.RESERVED
+                    || printer.getAssignedOrderId() != null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

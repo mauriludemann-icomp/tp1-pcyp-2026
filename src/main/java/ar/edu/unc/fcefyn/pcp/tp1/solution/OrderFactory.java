@@ -7,7 +7,7 @@ public class OrderFactory {
     private int countId;
 
     public OrderFactory() {
-        this.countId = 0;
+        this.countId = 1;
     }
 
     public List<Order> createOrders(int totalOrders) {
