@@ -85,3 +85,29 @@ Se activa el bloque *finally* en *ConcurrentSimulation*, invocando a *pipelineCo
 Dicho metodo cierra inmediatamente todas las colas del sistema (*queue.close()*) para destrabar a cualquier hilo suspendido en *wait()*.
 Envia una señal de interrupcion a cada hilo activo mediante *worker.interrupt()*, logrando que salgan de los bloqueos de simulacion de tiempo (*Thread.sleep*).
 Finalmente, espera a que cada uno de los hilos finalice mediante un ciclo de *join()*, garantizando el cumplimiento del invariante de no dejar hilos huerfanos o activos en memoria.
+
+## Analisis Teorico del Tiempo de Ejecucion
+Para estimar cuanto deberia tardar la simulacion de forma teorica bajo condiciones ideales, analizamos el comportamiento del pipeline en base a los valores establecidos en el archivo de configuracion *tp1.properties*:
+* **Total de ordenes:** 500 ordenes.
+* **Matriz de impresoras:** 10 filas x 20 columnas = 200 impresoras disponibles.
+* **Etapa 1 (Asignacion):** 3 hilos con una demora de 50 ms.
+* **Etapa 2 (Validacion):** 2 hilos con una demora de 120 ms.
+* **Etapa 3 (Impresion):** 3 hilos con una demora de 180 ms.
+* **Etapa 4 (Control de Calidad):** 2 hilos con una demora de 80 ms.
+#### 1. Identificacion del Cuello de Botella
+En una arquitectura por etapas concurrentes (*pipeline*), el ritmo general de avance del sistema queda determinado por la etapa mas lenta (el *cuello de botella*).
+Primero verificamos las impresoras: al disponer de 200 impresoras y tener como maximo 3 hilos trabajando en impresion a la vez, las impresoras nunca escasean ni frenan el avance, por lo que no representan una limitacion.
+Luego calculamos el tiempo promedio de despacho de cada etapa dividiendo su demora por la cantidad de hilos que trabajan en paralelo:
+* **Asignacion:** 50 ms / 3 hilos ≈ 16.67 ms por orden.
+* **Validacion:** 120 ms / 2 hilos = 60 ms por orden.
+* **Impresion:** 180 ms / 3 hilos = 60 ms por orden.
+* **Control de Calidad:** 80 ms / 2 hilos = 40 ms por orden.
+Como podemos observar, el cuello de botella se encuentra en la etapa de **Validacion** (y de Impresion), que despachan a un ritmo de 1 orden cada **60 ms**. Dado que la etapa de Validacion debe procesar obligatoriamente las 500 ordenes iniciales (a diferencia de las siguientes etapas donde algunas ordenes se van descartando), es esta etapa la que marca el tiempo total de procesamiento.
+#### 2. Estimacion del Tiempo Total
+El tiempo total se compone de dos partes:
+1. **Llenado inicial del pipeline:** El tiempo que tarda la primer orden en recorrer todas las etapas desde el inicio hasta el final:
+   * 50 ms + 120 ms + 180 ms + 80 ms = 430 ms.
+2. **Procesamiento de las ordenes restantes en el cuello de botella:** Las 499 ordenes restantes van saliendo al ritmo que impone la etapa de validacion (60 ms por orden):
+   * 499 ordenes x 60 ms = 29.940 ms.
+Sumando ambos terminos obtenemos el tiempo teorico esperado:
+* **Tiempo Teorico Total:** 430 ms + 29.940 ms = **30.370 ms (aproximadamente 30.4 segundos)**.
