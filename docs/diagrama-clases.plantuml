@@ -1,0 +1,296 @@
+@startuml diagrama-clases
+
+class PrinterManager {
+    - matrix: Printer[][]
+    - printerList: List<Printer>
+    ' reserveAvailablePrinter reserva una impresora disponible para la orden y cambia su estado a RESERVED.
+    + PrinterManager(int rows, int cols)
+    + synchronized reserveAvailablePrinter(int orderId): Printer
+    + synchronized releasePrinter(Printer printer, boolean printFailed): void
+    - findAvailablePrinter(): Printer
+    + synchronized getSnapshots(): List<PrinterSnapshot>
+    + synchronized getPrinterById(String printerId): Printer
+}
+
+class Printer {
+    - id: String
+    - pos: int[]
+    - state: PrinterState
+    - assignedOrderId: Integer
+    - count: int
+    + Printer(id: String, row: int, col: int)
+    + assignOrder(orderId: int): void
+    + release(): void
+    + markOutOfService(): void
+    + toSnapshot(): PrinterSnapshot
+    + getId(): String
+    + getPos(): int[]
+    + getState(): PrinterState
+    + getAssignedOrderId(): Integer
+    + getCount(): int
+}
+
+
+class PrinterFactory {
+    + createPrinterManager(int rows, int cols): PrinterManager
+}
+
+
+
+interface Runnable {
+    + run(): void
+}
+
+abstract class Worker {
+    # inputQueue: WorkQueue
+    # outputQueue: WorkQueue
+    # eventLogger: EventLogger
+    # stageName: String 
+    + Worker(WorkQueue inputQueue, WorkQueue outputQueue, EventLogger eventLogger, String stageName)
+    +run(): void
+    # processOrder(Order order): void
+}
+
+class PrinterAssignmentWorker {
+    - printerManager: PrinterManager
+    - config: SimulationConfig
+
+    + PrinterAssignmentWorker(WorkQueue inputQueue, WorkQueue outputQueue, EventLogger eventLogger, SimulationConfig config, PrinterManager printerManager)
+    # processOrder(Order order): void
+}
+
+class ValidationWorker {
+    - config: SimulationConfig
+    - printerManager: PrinterManager
+
+    + ValidationWorker(WorkQueue inputQueue, WorkQueue outputQueue, EventLogger eventLogger, SimulationConfig config, PrinterManager printerManager)
+    # processOrder(Order order): void
+}
+
+class PrintingWorker {
+    - config: SimulationConfig
+    - printerManager: PrinterManager
+
+    + PrintingWorker(WorkQueue inputQueue, WorkQueue outputQueue, EventLogger eventLogger, SimulationConfig config, PrinterManager printerManager)
+    # processOrder(Order order): void
+}
+
+class QualityWorker {
+     - config: SimulationConfig
+
+    + QualityWorker(WorkQueue inputQueue, EventLogger eventLogger, SimulationConfig config)
+    # processOrder(Order order): void
+}
+
+
+' Hay que crear 4 instancias def WOrkQueue, una para cada etapa
+class WorkQueue {
+    - queue: Queue<Order>
+    - int capacity
+    - boolean closed
+    ' Al hacer push sobre una queue se debe hacer un notifyAll de los hilos de la siguiente etapa para que busquen el recurso
+    + push(Order order): void
+    + pop(): Order
+    + close(): void
+    + isEmpty(): boolean
+    + size(): int
+}
+
+class Order {
+    - id: int
+    - state: OrderState
+    - assignedPrinterId: String
+    - assignmentCount: int
+    - validationCount: int
+    - printingCount: int
+    - qualityControlCount: int
+
+    + Order(int id)
+    + synchronized getId(): int
+    + synchronized getState(): OrderState
+    + synchronized getAssignedPrinterId(): String
+    + synchronized getAssignmentCount(): int
+    + synchronized getValidationCount(): int
+    + synchronized getPrintingCount(): int
+    + synchronized getQualityControlCount(): int
+
+    + synchronized onAssigned(String printerId): void
+    + synchronized onValidationResult(boolean valid): void
+    + synchronized onPrintResult(boolean success): void
+    + synchronized onQualityResult(boolean approved): void
+
+    + synchronized toSnapshot(): OrderSnapshot
+}
+
+' CreateOrders devuelve una lista de ordenes creadas. Desde ConcurrentSimuilation se debe agregar las ordenes a la WorkQueue correspondiente. Al ser factoyry solo se encarga de crearlas nada mas.
+class OrderFactory {
+    + createOrders(int totalOrder): List<Order>
+    - createOrder(int id): Order
+}
+
+class OrderManager {    
+    - orderMap: Map<Integer, Order>
+    + OrderManager()
+    + synchronized addOrder(Order order): void
+    + synchronized getOrderById(int orderId): Order
+    + synchronized getOrderSnapshot(int orderId): OrderSnapshot
+    + synchronized getAllSnapshots(): Map<Integer, OrderSnapshot>
+    + synchronized getTotalOrders(): int
+}
+/' El hilo main recorre la lista de órdenes y hace dos cosas por cada una:
+
+Deposita la orden en la primera cola: createdQueue.push(order).
+
+Escribe la fila inicial en eventos.csv con stage = INITIALIZATION y event = ORDER_CREATED. '/
+
+class PipelineCoordinator <<final>> {
+    - stages: List<List<Thread>>
+    - queues: List<WorkQueue>
+    - allWorkers: List<Thread>
+    + PipelineCoordinator(List<List<Thread>> stages, List<WorkQueue> queues)
+    + startAllWorkers(): void
+    + awaitStageAndCloseOutput(int stageIndex, WorkQueue outputQueue): void
+    + cancelAndAwaitTermination(): void
+}
+
+class EventLogger {
+    + field : type
+    + field : type
+    + field : type
+}
+
+' A PARTIR DE ESTA LINEA VIENE TODO LO INCLUIDO EN LA API
+
+class ConfigurationLoader <<final>> {
+    - ConfigurationLoader()
+    + {static} load(path: Path): SimulationConfig
+    - {static} integer(properties: Properties, key: String): int
+    - {static} longValue(properties: Properties, key: String): long
+    - {static} required(properties: Properties, key: String): String
+}
+
+class OrderSnapshot <<record>> {
+    + id: int
+    + state: OrderState
+    + assignedPrinterId: String
+    + assignmentCount: int
+    + validationCount: int
+    + printingCount: int
+    + qualityControlCount: int
+}
+
+enum PrinterState {
+    AVAILABLE
+    RESERVED
+    OUT_OF_SERVICE
+}
+
+enum OrderState {
+    APPROVED
+    REJECTED
+    READY_TO_PRINT
+    WAITING_VALIDATION
+    PRINT_FAILED
+    DEFECTIVE
+    PRINTED
+    CREATED
+    + isTerminal(): boolean
+}
+
+class OutcomeDecider {
+    - {static} VALIDATION_SALT: long
+    - {static} PRINTING_SALT: long
+    - {static} QUALITY_SALT: long
+    - OutcomeDecider()
+    + {static} isModelValid(orderId: int, config: SimulationConfig): boolean
+    + {static} isPrintSuccessful(orderId: int, config: SimulationConfig): boolean
+    + {static} isQualityApproved(orderId: int, config: SimulationConfig): boolean
+    ~ {static} percentage(seed: long, orderId: int, salt: long): int
+    }
+
+class PrinterSnapshot {
+    + id: String
+    + state: PrinterState
+    + assignedOrderId: Integer
+    + usageCount: int
+}
+
+interface Simulation {
+        + execute(config: SimulationConfig): SimulationResult
+}
+
+class SimulationConfig <<record>> {
+    + totalOrders: int
+    + printerRows: int
+    + printerColumns: int
+    + assignmentThreads: int
+    + validationThreads: int
+    + printingThreads: int
+    + qualityControlThreads: int
+    + validModelPercentage: int
+    + printSuccessPercentage: int
+    + qualityApprovedPercentage: int
+    + assignmentDelayMillis: long
+    + validationDelayMillis: long
+    + printingDelayMillis: long
+    + qualityControlDelayMillis: long
+    + randomSeed: long
+    + outputDirectory: Path
+    + totalPrinters(): int
+    - {static} requirePositive(name: String, value: int): void
+    - {static} requirePercentage(name: String, value: int): void
+    - {static} requireNonNegative(name: String, value: long): void
+    }
+
+class SimulationResult <<record>> {
+        + totalOrders: int
+        + processedOrders: int
+        + totalsByState: Map<OrderState, Integer>
+        + orders: List<OrderSnapshot>
+        + printers: List<PrinterSnapshot>
+        + durationMillis: long
+        + allThreadsTerminated: boolean
+    }
+
+' A PARTIR DE ACA RELACIOES ENTRE CLASES
+
+OrderFactory "1" ..> "1..*" Order : <<creates>>
+OrderManager "1" --> "1..*" Order : administra
+Order "1" --> "1" OrderState : tiene un estado
+Order "0..1" -- "0..1" Printer : asignada a
+WorkQueue "1" o-- "0..*" Order : almacena
+Worker "*" --> "1..2" WorkQueue : consume / produce
+Worker "*" --> "1" EventLogger : registra eventos en
+Worker <|-- PrinterAssignmentWorker
+Worker <|-- ValidationWorker
+Worker <|-- PrintingWorker
+Worker <|-- QualityWorker
+Printer "1" --> "1" PrinterState : tiene estado
+PrinterFactory "1" ..> "1..*" Printer : <<creates>>
+PrinterFactory ..> PrinterManager : <<creates>>
+PrinterManager "1" *-- "1..*" Printer : posee / contiene
+PrinterAssignmentWorker "*" --> "1" PrinterManager : solicita / libera
+PrinterAssignmentWorker --> SimulationConfig : consulta configuración
+ValidationWorker "*" --> "1" PrinterManager : libera
+ValidationWorker ..> OutcomeDecider : <<uses>>
+ValidationWorker --> SimulationConfig : consulta configuración
+PrintingWorker "*" --> "1" PrinterManager : libera / marca fuera de servicio
+PrintingWorker ..> OutcomeDecider : <<uses>>
+PrintingWorker --> SimulationConfig : consulta configuración
+QualityWorker ..> OutcomeDecider : <<uses>>
+QualityWorker --> SimulationConfig : consulta configuración
+ConfigurationLoader ..> SimulationConfig : crea
+OutcomeDecider ..> SimulationConfig
+Simulation ..> SimulationConfig
+Simulation ..> SimulationResult
+OrderSnapshot --> OrderState
+PrinterSnapshot --> PrinterState
+SimulationResult "1" o-- "*" OrderSnapshot
+SimulationResult "1" o-- "*" PrinterSnapshot
+SimulationResult --> OrderState : totalsByState
+Runnable <|.. Worker
+OrderManager ..> OrderSnapshot : genera
+PipelineCoordinator "1" o-- "*" Thread : coordina
+PipelineCoordinator "1" --> "*" WorkQueue : cierra / despierta
+
+@enduml
