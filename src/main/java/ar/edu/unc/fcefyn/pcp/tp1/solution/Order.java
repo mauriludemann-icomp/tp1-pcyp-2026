@@ -3,6 +3,10 @@ package ar.edu.unc.fcefyn.pcp.tp1.solution;
 import ar.edu.unc.fcefyn.pcp.tp1.api.OrderSnapshot;
 import ar.edu.unc.fcefyn.pcp.tp1.api.OrderState;
 
+/*
+ * Cada orden protege su propio estado con su lock (los metodos synchronized usan
+ * el lock de esta instancia). Cambiar una orden no frena a quien cambia otra.
+ */
 public final class Order {
 
     //Datos fijos
@@ -20,22 +24,23 @@ public final class Order {
         this.id = id;
     }
 
+    // id es final: no necesita lock.
     public int getId() {
         return id;
     }
 
-    OrderState getState() {
+    synchronized OrderState getState() {
         return state;
     }
 
-    Printer getAssignedPrinter() {
+    synchronized Printer getAssignedPrinter() {
         return assignedPrinter;
     }
 
     //Etapa 1: CREATED -> WAITING_VALIDATION y guarda la impresora en el historial
-    void assign(Printer printer) {
-            if (printer == null) {
-        throw new IllegalArgumentException("La impresora no puede ser null");
+    synchronized void assign(Printer printer) {
+        if (printer == null) {
+            throw new IllegalArgumentException("La impresora no puede ser null");
         }
         if (assignedPrinter != null) {
             throw new IllegalStateException("La orden " + id + " ya fue asignada a " + assignedPrinter.getId());
@@ -45,30 +50,31 @@ public final class Order {
     }
 
     //Etapa 2: WAITING_VALIDATION -> READY_TO_PRINT o REJECTED
-    void finishValidation(boolean valid) {
+    synchronized void finishValidation(boolean valid) {
         OrderState to = valid ? OrderState.READY_TO_PRINT : OrderState.REJECTED;
         advance(Stage.VALIDATION, OrderState.WAITING_VALIDATION, to);
     }
 
     //Etapa 3: READY_TO_PRINT -> PRINTED o PRINT_FAILED
-    void finishPrinting(boolean successful) {
+    synchronized void finishPrinting(boolean successful) {
         OrderState to = successful ? OrderState.PRINTED : OrderState.PRINT_FAILED;
         advance(Stage.PRINTING, OrderState.READY_TO_PRINT, to);
     }
 
     //Etapa 4: PRINTED -> APPROVED o DEFECTIVE
-    void finishQualityControl(boolean approved) {
+    synchronized void finishQualityControl(boolean approved) {
         OrderState to = approved ? OrderState.APPROVED : OrderState.DEFECTIVE;
         advance(Stage.QUALITY_CONTROL, OrderState.PRINTED, to);
     }
 
-    OrderSnapshot toSnapshot() {
+    synchronized OrderSnapshot toSnapshot() {
         String printerId = (assignedPrinter == null) ? null : assignedPrinter.getId();
         return new OrderSnapshot(id, state, printerId,
                 assignmentCount, validationCount, printingCount, qualityControlCount);
     }
 
-    //Cambia de estado validando el origen y suma el contador de la etapa
+    //Cambia de estado validando el origen y suma el contador de la etapa.
+    //Siempre se llama desde un metodo synchronized de esta orden.
     private void advance(Stage stage, OrderState from, OrderState to) {
         if (state != from) {
             throw new IllegalStateException("La orden " + id + " deberia estar en " + from + " pero esta en " + state);

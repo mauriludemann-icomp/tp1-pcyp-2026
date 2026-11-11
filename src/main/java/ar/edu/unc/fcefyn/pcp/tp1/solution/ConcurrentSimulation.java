@@ -74,7 +74,7 @@ public final class ConcurrentSimulation implements Simulation {
         }
 
         // Fuera del monitor. Una interrupcion no permite abandonar los join pendientes.
-        for (Thread thread : startedThreads) {
+        for (Thread thread : startedThreads) { //esperamos que terminen todos los hilos 
             boolean joined = false;
             while (!joined) {
                 try {

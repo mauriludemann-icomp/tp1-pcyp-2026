@@ -13,6 +13,23 @@ import ar.edu.unc.fcefyn.pcp.tp1.api.PrinterSnapshot;
 import ar.edu.unc.fcefyn.pcp.tp1.api.PrinterState;
 import ar.edu.unc.fcefyn.pcp.tp1.api.SimulationConfig;
 
+/*
+ * Cada recurso compartido tiene su propio lock y cada operacion toma solo el del
+ * recurso que toca, por el menor tiempo posible. Ningun lock se toma dentro de otro.
+ *
+ *   - Cada cola: su propio objeto (take / enqueue).
+ *   - printersLock: la matriz de impresoras (buscar, reservar, liberar, deshabilitar).
+ *   - eventsLock: solo la escritura de una fila en eventos.csv.
+ *   - completionLock: processedOrders, failure, cancelled y completed.
+ *
+ * El estado de cada orden lo protege la propia orden (metodos synchronized en Order):
+ * cambiar una orden no frena a quien cambia otra. No hay un lock global de ordenes.
+ *
+ * Orden de las operaciones respecto del log:
+ *   - Al tomar una impresora: reservar -> cambiar la orden -> registrar.
+ *   - Al soltarla: cambiar la orden -> registrar -> liberar / deshabilitar.
+ * Asi eventos.csv nunca muestra una impresora asignada a dos ordenes a la vez.
+ */
 public final class SimulationMonitor {
 
     // 1. Datos compartidos e inicializacion
@@ -21,19 +38,20 @@ public final class SimulationMonitor {
     private final Printer[][] printers;
 
     // Colas FIFO: offer agrega al final y poll retira la primera orden.
-    // Cada cola tiene su propio monitor.
+    // Cada cola es su propio monitor.
     private final Queue<Order> assignmentQueue = new ArrayDeque<>();
     private final Queue<Order> validationQueue = new ArrayDeque<>();
     private final Queue<Order> printingQueue = new ArrayDeque<>();
     private final Queue<Order> qualityControlQueue = new ArrayDeque<>();
 
-    private final Object printersLock = new Object();
-    private final Object eventsLock = new Object(); // Estado de las ordenes y su registro en el CSV.
-    private final Object completionLock = new Object();
+    private final Object printersLock = new Object();   // matriz de impresoras
+    private final Object eventsLock = new Object();     // solo escritura en eventos.csv
+    private final Object completionLock = new Object(); // contador, falla, cancelacion y fin
     private final EventLogger eventLogger;
 
     private int processedOrders;
     private Throwable failure;
+    // Se escriben con completionLock y se leen desde otros locks: volatile garantiza visibilidad.
     private volatile boolean cancelled;
     private volatile boolean completed;
 
@@ -60,15 +78,19 @@ public final class SimulationMonitor {
     public Order takeForAssignment() throws InterruptedException {
         return takeFrom(assignmentQueue);
     }
+
     public Order takeForValidation() throws InterruptedException {
         return takeFrom(validationQueue);
     }
+
     public Order takeForPrinting() throws InterruptedException {
         return takeFrom(printingQueue);
     }
+
     public Order takeForQualityControl() throws InterruptedException {
         return takeFrom(qualityControlQueue);
     }
+
     // El mismo metodo usa un monitor diferente segun la cola recibida.
     private Order takeFrom(Queue<Order> queue) throws InterruptedException {
         synchronized (queue) {
@@ -81,7 +103,8 @@ public final class SimulationMonitor {
             return queue.poll();
         }
     }
-    // Se invoca despues de soltar los candados de impresoras y eventos.
+
+    // Se invoca sin ningun otro lock tomado.
     private void enqueue(Queue<Order> queue, Order order) {
         synchronized (queue) {
             if (!cancelled) {
@@ -96,98 +119,83 @@ public final class SimulationMonitor {
             return queue.isEmpty();
         }
     }
-    // 3. Etapas: actualizar recursos y registrar el evento; luego encolar o finalizar.
+
+    // 3. Etapas
+    // Tomar impresora: reservar -> cambiar la orden -> registrar -> encolar.
     public boolean assignPrinter(Order order) throws InterruptedException {
-        try {
-            synchronized (printersLock) {
-                if (cancelled) {
-                    return false;
-                }
-                synchronized (eventsLock) {
-                    requirePendingAssignment(order);
-                }
-                Printer printer = findAvailablePrinter();
-                while (printer == null && !cancelled) {
-                    // No se retiene ningun otro candado durante esta espera.
-                    printersLock.wait();
-                    printer = findAvailablePrinter();
-                }
-                if (cancelled) {
-                    return false;
-                }
-                // Unico orden de anidamiento: impresoras -> eventos.
-                synchronized (eventsLock) {
-                    if (cancelled) {
-                        return false;
-                    }
-                    requirePendingAssignment(order);
-                    printer.reserve(order);
-                    order.assign(printer);
-                    log(order, Stage.ASSIGNMENT, OrderState.CREATED, OrderState.WAITING_VALIDATION);
-                }
-            }
-        } catch (UncheckedIOException error) {
-            // Despertar otras colas solo cuando ya se soltaron los candados anteriores.
-            cancel(error);
-            throw error;
+        if (cancelled) {
+            return false;
         }
+        requirePendingAssignment(order);
+
+        Printer printer;
+        synchronized (printersLock) {
+            // Buscar y reservar en la misma seccion critica: nadie mas toma esta impresora.
+            printer = findAvailablePrinter();
+            while (printer == null && !cancelled) {
+                printersLock.wait(); // no se retiene ningun otro lock durante la espera
+                printer = findAvailablePrinter();
+            }
+            if (cancelled) {
+                return false;
+            }
+            printer.reserve(order);
+        }
+        // Si se cancela desde aca, la reserva la limpia releaseReservationsAfterCancellation.
+        if (cancelled) {
+            return false;
+        }
+
+        order.assign(printer);
+        logTransition(order, Stage.ASSIGNMENT, OrderState.CREATED, OrderState.WAITING_VALIDATION);
         enqueue(validationQueue, order);
         return !cancelled;
     }
 
+    // Valida: cambiar la orden -> registrar -> encolar.
+    // Rechaza: cambiar la orden -> registrar -> liberar impresora -> contar.
     public void completeValidation(Order order, boolean valid) {
-        try {
-            synchronized (printersLock) {
-                synchronized (eventsLock) {
-                    if (cancelled) {
-                        return;
-                    }
-                    Printer printer = requireAssignedPrinter(order);
-                    order.finishValidation(valid);
-                    if (!valid) {
-                        printer.release(order);
-                    }
-                    log(order, Stage.VALIDATION, OrderState.WAITING_VALIDATION,
-                            valid ? OrderState.READY_TO_PRINT : OrderState.REJECTED);
-                }
-                if (!valid) {
-                    printersLock.notifyAll();
-                }
-            }
-        } catch (UncheckedIOException error) {
-            cancel(error);
-            throw error;
+        if (cancelled) {
+            return;
         }
+        Printer printer = requireAssignedPrinter(order);
+
+        order.finishValidation(valid);
+        logTransition(order, Stage.VALIDATION, OrderState.WAITING_VALIDATION,
+                valid ? OrderState.READY_TO_PRINT : OrderState.REJECTED);
 
         if (valid) {
+            // La impresora sigue reservada para esta orden: no se toca printersLock.
             enqueue(printingQueue, order);
         } else {
+            synchronized (printersLock) {
+                printer.release(order); // valida que este reservada por esta orden
+                printersLock.notifyAll();
+            }
             registerProcessedOrder();
         }
     }
 
+    // Exito: cambiar la orden -> registrar -> liberar impresora -> encolar.
+    // Falla: cambiar la orden -> registrar -> deshabilitar impresora -> contar.
     public void completePrinting(Order order, boolean successful) {
-        try {
-            synchronized (printersLock) {
-                synchronized (eventsLock) {
-                    if (cancelled) {
-                        return;
-                    }
-                    Printer printer = requireAssignedPrinter(order);
-                    order.finishPrinting(successful);
-                    if (successful) {
-                        printer.release(order);
-                    } else {
-                        printer.disable(order);
-                    }
-                    log(order, Stage.PRINTING, OrderState.READY_TO_PRINT,
-                            successful ? OrderState.PRINTED : OrderState.PRINT_FAILED);
-                }
+        if (cancelled) {
+            return;
+        }
+        Printer printer = requireAssignedPrinter(order);
+
+        order.finishPrinting(successful);
+        logTransition(order, Stage.PRINTING, OrderState.READY_TO_PRINT,
+                successful ? OrderState.PRINTED : OrderState.PRINT_FAILED);
+
+        synchronized (printersLock) {
+            if (successful) {
+                printer.release(order);
                 printersLock.notifyAll();
+            } else {
+                // Una impresora fuera de servicio no se vuelve a usar: no hay a quien avisar.
+                printer.disable(order);
             }
-        } catch (UncheckedIOException error) {
-            cancel(error);
-            throw error;
         }
 
         if (successful) {
@@ -197,26 +205,25 @@ public final class SimulationMonitor {
         }
     }
 
+    // Control de calidad no usa impresoras: cambiar la orden -> registrar -> contar.
     public void completeQualityControl(Order order, boolean approved) {
-        try {
-            synchronized (eventsLock) {
-                if (cancelled) {
-                    return;
-                }
-                order.finishQualityControl(approved);
-                log(order, Stage.QUALITY_CONTROL, OrderState.PRINTED,
-                        approved ? OrderState.APPROVED : OrderState.DEFECTIVE);
-            }
-        } catch (UncheckedIOException error) {
-            cancel(error);
-            throw error;
+        if (cancelled) {
+            return;
         }
+        if (order == null) {
+            throw new IllegalArgumentException("La orden no puede ser null");
+        }
+        order.finishQualityControl(approved);
+        logTransition(order, Stage.QUALITY_CONTROL, OrderState.PRINTED,
+                approved ? OrderState.APPROVED : OrderState.DEFECTIVE);
         registerProcessedOrder();
     }
+
     // 4. Finalizacion y cancelacion
-    // La impresora ya se libero y el evento terminal ya se registro al contar la orden.
     private void registerProcessedOrder() {
         synchronized (completionLock) {
+            // Dentro del lock: "si no esta cancelada, contar y quizas completar" debe ser
+            // atomico respecto de cancel(), que tambien escribe con completionLock.
             if (cancelled) {
                 return;
             }
@@ -227,6 +234,7 @@ public final class SimulationMonitor {
             completed = true;
             completionLock.notifyAll();
         }
+        // Solo se llega aca con la ultima orden: despertar a todos para que vean completed.
         wakeAllWaiters();
     }
 
@@ -252,7 +260,8 @@ public final class SimulationMonitor {
             cancel(new IllegalStateException("La simulacion termino con ordenes en las colas"));
         }
     }
-    // Se llama sin otros candados tomados. Se adquiere y libera uno por vez.
+
+    // Se llama sin otros locks tomados. Se adquiere y libera uno por vez.
     private void wakeAllWaiters() {
         for (Object lock : List.of(assignmentQueue, validationQueue, printingQueue,
                 qualityControlQueue, printersLock)) {
@@ -261,6 +270,7 @@ public final class SimulationMonitor {
             }
         }
     }
+
     // Solo despues de cancelar y con todos los workers terminados.
     public void releaseReservationsAfterCancellation() {
         synchronized (printersLock) {
@@ -273,6 +283,7 @@ public final class SimulationMonitor {
             }
         }
     }
+
     // 5. Consultas y resultados
     public Throwable getFailure() {
         synchronized (completionLock) {
@@ -286,26 +297,24 @@ public final class SimulationMonitor {
         }
     }
 
+    // La lista orders no se modifica despues del constructor; cada orden se lee con
+    // su propio lock.
     public int getRemainingIntermediateOrders() {
-        synchronized (eventsLock) {
-            int remaining = 0;
-            for (Order order : orders) {
-                if (!order.getState().isTerminal()) {
-                    remaining++;
-                }
+        int remaining = 0;
+        for (Order order : orders) {
+            if (!order.getState().isTerminal()) {
+                remaining++;
             }
-            return remaining;
         }
+        return remaining;
     }
 
     public List<OrderSnapshot> getOrderSnapshots() {
-        synchronized (eventsLock) {
-            List<OrderSnapshot> snapshots = new ArrayList<>(orders.size());
-            for (Order order : orders) {
-                snapshots.add(order.toSnapshot());
-            }
-            return snapshots;
+        List<OrderSnapshot> snapshots = new ArrayList<>(orders.size());
+        for (Order order : orders) {
+            snapshots.add(order.toSnapshot());
         }
+        return snapshots;
     }
 
     public List<PrinterSnapshot> getPrinterSnapshots() {
@@ -319,7 +328,8 @@ public final class SimulationMonitor {
             return snapshots;
         }
     }
-    // 6. Auxiliares: busqueda, validaciones y registro de eventos
+
+    // 6. Auxiliares
     // Llamado con printersLock tomado: buscar y reservar no pueden intercalarse.
     private Printer findAvailablePrinter() {
         for (Printer[] row : printers) {
@@ -331,7 +341,8 @@ public final class SimulationMonitor {
         }
         return null;
     }
-    // Llamado con eventsLock tomado.
+
+    // Lee la orden con su propio lock (metodos synchronized de Order).
     private void requirePendingAssignment(Order order) {
         if (order == null) {
             throw new IllegalArgumentException("La orden no puede ser null");
@@ -341,25 +352,36 @@ public final class SimulationMonitor {
                     "La orden " + order.getId() + " no esta pendiente de asignacion");
         }
     }
-    // Llamado con printersLock y eventsLock tomados.
+
+    // Lee la orden con su propio lock. Que la impresora este reservada por esta orden
+    // lo validan release() y disable() con printersLock tomado.
     private Printer requireAssignedPrinter(Order order) {
         if (order == null) {
             throw new IllegalArgumentException("La orden no puede ser null");
         }
         Printer printer = order.getAssignedPrinter();
-        if (printer == null || printer.getState() != PrinterState.RESERVED
-                || printer.getAssignedOrder() != order) {
-            throw new IllegalStateException(
-                    "La orden " + order.getId() + " no tiene una reserva valida");
+        if (printer == null) {
+            throw new IllegalStateException("La orden " + order.getId() + " no tiene impresora asignada");
         }
         return printer;
     }
-    // eventsLock protege tanto la transicion como su fila
-    private void log(Order order, Stage stage, OrderState from, OrderState to) {
+
+    // eventsLock cubre solo la escritura de la fila: el numero de secuencia y el orden
+    // de las filas coinciden con el orden en que se confirman las transiciones.
+    // El id de la impresora se lee antes, con el lock de la orden, para no tomar el
+    // lock de la orden dentro de eventsLock.
+    // Si la escritura falla, se cancela la simulacion fuera de eventsLock.
+    private void logTransition(Order order, Stage stage, OrderState from, OrderState to) {
+        Printer printer = order.getAssignedPrinter();
+        String printerId = (printer == null) ? "" : printer.getId();
         try {
-            eventLogger.logTransition(order, stage, from, to);
+            synchronized (eventsLock) {
+                eventLogger.logTransition(order, printerId, stage, from, to);
+            }
         } catch (IOException error) {
-            throw new UncheckedIOException("No se pudo escribir eventos.csv", error);
+            UncheckedIOException writeError = new UncheckedIOException("No se pudo escribir eventos.csv", error);
+            cancel(writeError);
+            throw writeError;
         }
     }
 }

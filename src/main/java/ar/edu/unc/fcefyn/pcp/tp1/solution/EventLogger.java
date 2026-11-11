@@ -41,12 +41,15 @@ public final class EventLogger {
 
     //Fila inicial de cada orden: ORDER_CREATED, sin fromState ni printer
     public void logCreation(Order order) throws IOException {
-        writeRow(order, Stage.INITIALIZATION, EventType.ORDER_CREATED, null, OrderState.CREATED); 
+        writeRow(order.getId(), "", Stage.INITIALIZATION, EventType.ORDER_CREATED, null, OrderState.CREATED);
     }
 
-    //Fila de cada cambio de estado posterior
-    public void logTransition(Order order, Stage stage, OrderState fromState, OrderState toState) throws IOException {
-        writeRow(order, stage, EventType.ORDER_STATE_CHANGED, fromState, toState);  
+    //Fila de cada cambio de estado posterior.
+    //El id de la impresora lo lee el llamador antes de tomar el lock de eventos,
+    //asi el logger no toma el lock de la orden mientras escribe.
+    public void logTransition(Order order, String printerId, Stage stage,
+                              OrderState fromState, OrderState toState) throws IOException {
+        writeRow(order.getId(), printerId, stage, EventType.ORDER_STATE_CHANGED, fromState, toState);
     }
 
     public void close() throws IOException {
@@ -54,14 +57,14 @@ public final class EventLogger {
     }
 
     //Arma y escribe una fila con los 9 campos en el orden de la cabecera
-    private void writeRow(Order order, Stage stage, EventType event,
+    private void writeRow(int orderId, String printerId, Stage stage, EventType event,
                           OrderState fromState, OrderState toState) throws IOException {
         long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
         String thread = Thread.currentThread().getName();
         String from = (fromState == null) ? "" : fromState.name();
-        String printer = (order.getAssignedPrinter() == null) ? "" : order.getAssignedPrinter().getId();
+        String printer = (printerId == null) ? "" : printerId;
 
-        writer.write(nextSequence + ";" + elapsedMs + ";" + thread + ";" + order.getId() + ";"
+        writer.write(nextSequence + ";" + elapsedMs + ";" + thread + ";" + orderId + ";"
                 + stage + ";" + event + ";" + from + ";" + toState + ";" + printer);
         writer.newLine();
         nextSequence++;
