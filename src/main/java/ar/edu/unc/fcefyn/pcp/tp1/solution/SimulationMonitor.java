@@ -97,7 +97,7 @@ public final class SimulationMonitor {
             while (queue.isEmpty() && !completed && !cancelled) {
                 queue.wait();
             }
-            if (cancelled || completed) {
+            if (cancelled || completed) { //la razon por la que sali puede ser porque se cancelo/completo el sistema, lo atrapo aca
                 return null;
             }
             return queue.poll();
@@ -106,11 +106,12 @@ public final class SimulationMonitor {
 
     // Se invoca sin ningun otro lock tomado.
     private void enqueue(Queue<Order> queue, Order order) {
+        if (cancelled){
+            return;
+        }
         synchronized (queue) {
-            if (!cancelled) {
-                queue.offer(order);
-                queue.notifyAll();
-            }
+            queue.offer(order);
+            queue.notifyAll();
         }
     }
 
@@ -136,7 +137,7 @@ public final class SimulationMonitor {
                 printersLock.wait(); // no se retiene ningun otro lock durante la espera
                 printer = findAvailablePrinter();
             }
-            if (cancelled) {
+            if (cancelled) { //la razon por la que sali puede ser porque se cancelo el sistema, lo atrapo aca
                 return false;
             }
             printer.reserve(order);
@@ -169,7 +170,7 @@ public final class SimulationMonitor {
             enqueue(printingQueue, order);
         } else {
             synchronized (printersLock) {
-                printer.release(order); // valida que este reservada por esta orden
+                printer.release(order); // .release valida que este reservada por esta orden
                 printersLock.notifyAll();
             }
             registerProcessedOrder();
@@ -224,15 +225,15 @@ public final class SimulationMonitor {
         synchronized (completionLock) {
             // Dentro del lock: "si no esta cancelada, contar y quizas completar" debe ser
             // atomico respecto de cancel(), que tambien escribe con completionLock.
-            if (cancelled) {
+            if (cancelled) { // si lo leyesemos afuera podria pasar que un hilo complete mientras otro cancela, tiene que ser atomico
                 return;
             }
             processedOrders++;
             if (processedOrders != config.totalOrders()) {
                 return;
             }
-            completed = true;
-            completionLock.notifyAll();
+            completed = true; //si processedOrders = totalOrders llego hasta aca, sino no
+            completionLock.notifyAll(); //lo despertamos aparte porque ya estamos en el completionLock, no hace falta en wakeAllWaiters
         }
         // Solo se llega aca con la ultima orden: despertar a todos para que vean completed.
         wakeAllWaiters();
@@ -244,7 +245,7 @@ public final class SimulationMonitor {
                 failure = cause;
             }
             cancelled = true;
-            completionLock.notifyAll();
+        completionLock.notifyAll(); 
         }
         wakeAllWaiters();
     }
@@ -264,7 +265,7 @@ public final class SimulationMonitor {
     // Se llama sin otros locks tomados. Se adquiere y libera uno por vez.
     private void wakeAllWaiters() {
         for (Object lock : List.of(assignmentQueue, validationQueue, printingQueue,
-                qualityControlQueue, printersLock)) {
+                qualityControlQueue, printersLock)) { //nadie hace wait sobre eventsLock, no hace falta notificarlo
             synchronized (lock) {
                 lock.notifyAll();
             }
@@ -318,8 +319,8 @@ public final class SimulationMonitor {
     }
 
     public List<PrinterSnapshot> getPrinterSnapshots() {
+        List<PrinterSnapshot> snapshots = new ArrayList<>();
         synchronized (printersLock) {
-            List<PrinterSnapshot> snapshots = new ArrayList<>();
             for (Printer[] row : printers) {
                 for (Printer printer : row) {
                     snapshots.add(printer.toSnapshot());
