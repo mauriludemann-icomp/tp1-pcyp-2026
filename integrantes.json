@@ -1,11 +1,32 @@
 {
-  "grupo": "REEMPLAZAR_CON_NOMBRE_DEL_GRUPO",
-  "repositorio": "REEMPLAZAR_CON_URL_DEL_REPOSITORIO",
+  "grupo": "thread-the-needle",
+  "repositorio": "https://github.com/CatiniMariano/thread-the-needle-entrega-tp1",
   "integrantes": [
     {
-      "nombre": "REEMPLAZAR",
-      "documento": "REEMPLAZAR",
-      "usuarioGit": "REEMPLAZAR"
+      "nombre": "Catini, Mateo",
+      "documento": "42.153.442",
+      "usuarioGit": "https://github.com/Catiom"
+    },
+    {
+      "nombre": "Catini, Mariano",
+      "documento": "43.684.709",
+      "usuarioGit": "https://github.com/CatiniMariano"
+    }, 
+    {
+      "nombre": "Provensale, Lorenzo",
+      "documento": "47.263.887",
+      "usuarioGit": "https://github.com/LoloProven"
+    },
+    {
+      "nombre": "Vallenari, Tizziano",
+      "documento": "46554045",
+      "usuarioGit": "https://github.com/tizzianovallenari-del"
+    },
+    {
+      "nombre": "Cheble, José Francisco",
+      "documento": "35738401",
+      "usuarioGit": ""
+
     }
   ]
 }
