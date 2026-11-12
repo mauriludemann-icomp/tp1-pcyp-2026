@@ -13,23 +13,6 @@ import ar.edu.unc.fcefyn.pcp.tp1.api.PrinterSnapshot;
 import ar.edu.unc.fcefyn.pcp.tp1.api.PrinterState;
 import ar.edu.unc.fcefyn.pcp.tp1.api.SimulationConfig;
 
-/*
- * Cada recurso compartido tiene su propio lock y cada operacion toma solo el del
- * recurso que toca, por el menor tiempo posible. Ningun lock se toma dentro de otro.
- *
- *   - Cada cola: su propio objeto (take / enqueue).
- *   - printersLock: la matriz de impresoras (buscar, reservar, liberar, deshabilitar).
- *   - eventsLock: solo la escritura de una fila en eventos.csv.
- *   - completionLock: processedOrders, failure, cancelled y completed.
- *
- * El estado de cada orden lo protege la propia orden (metodos synchronized en Order):
- * cambiar una orden no frena a quien cambia otra. No hay un lock global de ordenes.
- *
- * Orden de las operaciones respecto del log:
- *   - Al tomar una impresora: reservar -> cambiar la orden -> registrar.
- *   - Al soltarla: cambiar la orden -> registrar -> liberar / deshabilitar.
- * Asi eventos.csv nunca muestra una impresora asignada a dos ordenes a la vez.
- */
 public final class SimulationMonitor {
 
     // 1. Datos compartidos e inicializacion
@@ -367,11 +350,6 @@ public final class SimulationMonitor {
         return printer;
     }
 
-    // eventsLock cubre solo la escritura de la fila: el numero de secuencia y el orden
-    // de las filas coinciden con el orden en que se confirman las transiciones.
-    // El id de la impresora se lee antes, con el lock de la orden, para no tomar el
-    // lock de la orden dentro de eventsLock.
-    // Si la escritura falla, se cancela la simulacion fuera de eventsLock.
     private void logTransition(Order order, Stage stage, OrderState from, OrderState to) {
         Printer printer = order.getAssignedPrinter();
         String printerId = (printer == null) ? "" : printer.getId();
